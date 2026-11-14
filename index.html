@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fristenbrett">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EEF1F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F151E" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Fristenbrett</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: eine Spalte fürs Handy, vier Ansichten über eine feste Leiste unten, Bearbeiten in einem Blatt von unten. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --ink:#152033; --muted:#5B6678; --line:#D5DBE3;
+  --accent:#0B6E6E; --accent-ink:#FFFFFF;
+  --crit:#C0362C; --warn:#A86200; --ok:#2E7D4F; --block:#6B4FA3;
+  --c-uni:#2F5FC4; --c-privat:#0B6E6E; --c-amt:#8A5A2B;
+  --display:"Space Grotesk","Avenir Next",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F151E; --surface:#182130; --ink:#E8EDF4; --muted:#9AA6B8; --line:#2A3546;
+  --accent:#4FC4BE; --accent-ink:#06201F;
+  --crit:#FF7A6E; --warn:#F0B048; --ok:#6CCB8F; --block:#B79CF0;
+  --c-uni:#8CB0FF; --c-privat:#4FC4BE; --c-amt:#D9A86C; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0F151E; --surface:#182130; --ink:#E8EDF4; --muted:#9AA6B8; --line:#2A3546;
+  --accent:#4FC4BE; --accent-ink:#06201F;
+  --crit:#FF7A6E; --warn:#F0B048; --ok:#6CCB8F; --block:#B79CF0;
+  --c-uni:#8CB0FF; --c-privat:#4FC4BE; --c-amt:#D9A86C; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:16px 96px;-webkit-text-size-adjust:100%}
+#app{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:26px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.top .date{color:var(--muted);font-size:13px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;font-weight:600;min-height:44px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--crit)}
+.btn.small{min-height:36px;padding:6px 12px;font-size:13px}
+.section,#view{display:flex;flex-direction:column;gap:10px}
+#view{gap:22px}
+.list{display:flex;flex-direction:column;gap:8px}
+
+/* Kennzahlen */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.stat b{display:block;font-family:var(--display);font-size:28px;line-height:1;margin-bottom:4px}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.crit b{color:var(--crit)} .stat.warn b{color:var(--warn)} .stat.block b{color:var(--block)}
+
+/* Aufgabenkarte */
+.task{display:flex;flex-direction:column;gap:8px;text-align:left;width:100%;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.task .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.task .title{font-weight:600;font-size:16px;min-width:0;overflow-wrap:anywhere}
+.task.done .title{text-decoration:line-through;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--muted)}
+.cat{display:inline-flex;align-items:center;gap:5px;font-weight:600}
+.cat i{width:8px;height:8px;border-radius:2px;background:currentColor;display:inline-block}
+.cat.uni{color:var(--c-uni)} .cat.privat{color:var(--c-privat)} .cat.amt{color:var(--c-amt)}
+.chip{flex:none;font-size:12px;font-weight:600;border-radius:999px;padding:3px 9px;white-space:nowrap;
+  font-variant-numeric:tabular-nums;border:1px solid var(--line);color:var(--muted)}
+.chip.crit{color:var(--crit);border-color:var(--crit);background:color-mix(in srgb,var(--crit) 12%,transparent)}
+.chip.warn{color:var(--warn);border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.chip.soon{color:var(--ink)}
+.chip.okc{color:var(--ok);border-color:var(--ok)}
+.bar{height:8px;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.bar.blocked > i{background:repeating-linear-gradient(135deg,var(--block) 0 6px,color-mix(in srgb,var(--block) 45%,transparent) 6px 12px)}
+.prog{display:flex;align-items:center;gap:10px}
+.prog .bar{flex:1}
+.prog .pct{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;min-width:38px;text-align:right}
+.blockline{font-size:13px;color:var(--block);font-weight:500;overflow-wrap:anywhere}
+
+/* Uni-Check */
+.check{background:color-mix(in srgb,var(--c-uni) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--c-uni) 40%,var(--line));
+  border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.check .q{font-family:var(--display);font-weight:600;font-size:17px}
+.check .ctx{font-size:13px;color:var(--muted)}
+.check .acts{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Filter */
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--muted);min-height:36px}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* Woche */
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weeknav strong{font-family:var(--display);font-size:16px;font-variant-numeric:tabular-nums;text-align:center}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.day.today{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.day .dhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.day .dname{font-weight:600}
+.day .dname small{font-weight:400;color:var(--muted);margin-left:6px}
+.slot{display:flex;gap:10px;align-items:center;font-size:14px;min-width:0}
+.slot time{font-variant-numeric:tabular-nums;font-weight:600;flex:none;min-width:44px}
+.slot .what{flex:1;min-width:0;overflow-wrap:anywhere;text-align:left;background:none;border:0;padding:6px 0}
+.slot .x{flex:none;border:0;background:none;color:var(--muted);font-size:18px;min-width:36px;min-height:36px}
+.slot.deadline time{color:var(--crit)}
+.empty{color:var(--muted);font-size:14px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+
+/* Einstellungen */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card p{margin:0;font-size:14px;color:var(--muted);max-width:65ch}
+.switch{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:600}
+.switch input{width:22px;height:22px;accent-color:var(--accent)}
+.rowbtns{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Leiste unten */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+nav.tabs button{border:0;background:none;padding:10px 4px;font-size:13px;font-weight:600;color:var(--muted);border-radius:10px;min-height:48px}
+nav.tabs button[aria-current="page"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+
+/* Blatt */
+#sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;background:color-mix(in srgb,#000 45%,transparent)}
+.panel{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column;gap:14px}
+.panel .phead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select,.field textarea{font-size:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:44px}
+.field textarea{min-height:76px;resize:vertical}
+.field input[type=range]{padding:0;border:0;background:none;accent-color:var(--accent)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 10px}
+.step input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--accent)}
+.step textarea{flex:1;min-width:0;border:0;background:none;font-size:16px;line-height:1.35;padding:8px 0;resize:none;overflow:hidden;field-sizing:content}
+.step.on textarea{text-decoration:line-through;color:var(--muted)}
+.step button{border:0;background:none;color:var(--muted);font-size:18px;min-width:40px;min-height:40px}
+.addstep{display:flex;gap:8px}
+.addstep input{flex:1;min-width:0;font-size:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){ .bar > i{transition:width .25s ease} }
+</style>
+
+<div id="app">
+  <header class="top">
+    <div><div class="date" id="dateline"></div><h1 id="viewtitle">Fristenbrett</h1></div>
+    <button class="btn primary" data-act="new" id="newBtn">+ Aufgabe</button>
+  </header>
+  <main id="view"></main>
+</div>
+<nav class="tabs" aria-label="Ansichten">
+  <button data-tab="heute">Heute</button>
+  <button data-tab="aufgaben">Aufgaben</button>
+  <button data-tab="woche">Woche</button>
+  <button data-tab="mehr">Mehr</button>
+</nav>
+<div id="sheet" hidden></div>
+
+<script>
+(function(){
+"use strict";
+var CATS={privat:"Privat",uni:"Uni",amt:"Behörden & Steuer"};
+var inClaude=!!(window.claude&&window.claude.use);
+var STARTER={tasks:[{id:"steuer2023",title:"Steuererklärung 2023",cat:"amt",due:"2027-12-31",
+  blocked:"Steuer-ID bzw. Steuernummer fehlt",done:false,pct:0,
+  note:"Frist 31.12.2027 gilt bei freiwilliger Abgabe. Bei Abgabepflicht ist die Frist schon vorbei, dann zügig abgeben.\nSteuernummer: bei der ersten Erklärung in ELSTER leer lassen, das Finanzamt vergibt sie.",
+  steps:[{t:"Steuer-ID auf der Lohnsteuerbescheinigung suchen (11 Ziffern, „IdNr.“)",d:false},
+   {t:"Falls nicht zu finden: Steuer-ID beim BZSt neu anfordern (kommt per Post)",d:false},
+   {t:"ELSTER-Konto anlegen oder Zugang prüfen",d:false},
+   {t:"Lohnsteuerbescheinigung 2023 bereitlegen",d:false},
+   {t:"Belege sammeln (Arbeitsmittel, Fahrtkosten, Studienkosten)",d:false},
+   {t:"Erklärung in ELSTER ausfüllen",d:false},
+   {t:"Abschicken",d:false},
+   {t:"Steuerbescheid prüfen",d:false}]}],
+  slots:[],checks:{},settings:{uniChecks:true}};
+
+var state={tasks:[],slots:[],checks:{},settings:{uniChecks:true}};
+var ui={tab:"heute",filter:"alle",week:0,sheet:null,confirmDel:false,showDone:false};
+var loaded=false,mode="local",docRef=null,dirty=false,writing=false,syncErr=false,flushT=null,dl=null;
+
+/* ---------- Helfer ---------- */
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function pad(n){return String(n).padStart(2,"0")}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parse(s){var p=s.split("-").map(Number);return new Date(p[0],p[1]-1,p[2])}
+function today(){return iso(new Date())}
+function addDays(s,n){var d=parse(s);d.setDate(d.getDate()+n);return iso(d)}
+function diff(a,b){return Math.round((parse(a)-parse(b))/864e5)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function fmt(s,long){var d=parse(s),o={weekday:"short",day:"numeric",month:"short"};
+  if(long||d.getFullYear()!==new Date().getFullYear())o.year="numeric";return d.toLocaleDateString("de-DE",o)}
+function task(id){return state.tasks.find(function(t){return t.id===id})}
+function progress(t){if(t.done)return 100;if(t.steps&&t.steps.length)return Math.round(t.steps.filter(function(s){return s.d}).length/t.steps.length*100);return t.pct||0}
+function dueInfo(t){if(!t.due)return null;var n=diff(t.due,today());
+  if(t.done)return{cls:"okc",label:"erledigt"};
+  if(n<0)return{cls:"crit",label:"überfällig seit "+(-n)+(n===-1?" Tag":" Tagen")};
+  if(n===0)return{cls:"crit",label:"heute fällig"};
+  if(n===1)return{cls:"warn",label:"morgen fällig"};
+  if(n<=3)return{cls:"warn",label:"in "+n+" Tagen"};
+  if(n<=14)return{cls:"soon",label:"in "+n+" Tagen"};
+  if(n<=60)return{cls:"",label:"in "+Math.round(n/7)+" Wochen"};
+  return{cls:"",label:fmt(t.due)}}
+function normalize(s){s=s||{};return{tasks:Array.isArray(s.tasks)?s.tasks:[],slots:Array.isArray(s.slots)?s.slots:[],
+  checks:s.checks&&typeof s.checks==="object"?s.checks:{},settings:Object.assign({uniChecks:true},s.settings||{})}}
+function byDue(a,b){return(a.due||"9999").localeCompare(b.due||"9999")}
+
+/* ---------- Speichern ---------- */
+function cacheWrite(){try{localStorage.setItem("fristenbrett",JSON.stringify(state))}catch(e){}}
+function cacheRead(){try{var s=localStorage.getItem("fristenbrett");return s?normalize(JSON.parse(s)):null}catch(e){return null}}
+function save(){cacheWrite();if(mode!=="cloud")return;dirty=true;clearTimeout(flushT);flushT=setTimeout(flush,600)}
+function flush(){if(!docRef||writing||!dirty)return;writing=true;dirty=false;
+  docRef.set(JSON.parse(JSON.stringify(state))).then(function(){syncErr=false},function(){syncErr=true;dirty=true})
+  .then(function(){writing=false;if(dirty){clearTimeout(flushT);flushT=setTimeout(flush,syncErr?8000:600)}if(ui.tab==="mehr"&&!ui.sheet)render()})}
+function init(){
+  try{var t=localStorage.getItem("fristenbrett-tab");if(t)ui.tab=t}catch(e){}
+  var cached=cacheRead();if(cached)state=cached;
+  if(!inClaude){if(!cached)state=normalize(JSON.parse(JSON.stringify(STARTER)));loaded=true;cacheWrite();render();return}
+  render();
+  var timer=setTimeout(function(){if(!loaded){loaded=true;render()}},10000);
+  Promise.resolve(window.claude.use("downloads")).then(function(d){dl=d;if(ui.tab==="mehr")render()},function(){});
+  Promise.resolve(window.claude.use("db")).then(function(db){
+    if(!db){clearTimeout(timer);loaded=true;render();return}
+    mode="cloud";docRef=db.doc("app/state");
+    docRef.onSnapshot(function(snap){clearTimeout(timer);
+      if(dirty||writing){loaded=true;return}
+      if(snap.exists){var next=normalize(JSON.parse(JSON.stringify(snap.data())));
+        if(JSON.stringify(next)!==JSON.stringify(state)){state=next;cacheWrite();loaded=true;render();return}}
+      else if(state.tasks.length){dirty=true;flush()}
+      if(!loaded){loaded=true;render()}
+    },function(){clearTimeout(timer);mode="local";syncErr=true;loaded=true;render()});
+  },function(){clearTimeout(timer);loaded=true;render()});
+}
+
+/* ---------- Uni-Check ---------- */
+var CHECKS=[
+ {id:"termine-ws",q:"Klausurtermine und Abgaben fürs Wintersemester eingetragen?",from:[10,15],to:[12,15],title:"Klausurtermine und Abgaben eintragen"},
+ {id:"pruef-ws",q:"Für die Klausuren im Wintersemester angemeldet?",from:[11,15],to:[1,31],title:"Klausuranmeldung Wintersemester"},
+ {id:"rueck-ss",q:"Semesterbeitrag fürs Sommersemester schon gezahlt?",from:[1,10],to:[3,31],title:"Rückmeldung: Semesterbeitrag Sommersemester zahlen"},
+ {id:"beleg-ss",q:"Kurse fürs Sommersemester belegt?",from:[3,1],to:[4,30],title:"Kurse fürs Sommersemester belegen"},
+ {id:"termine-ss",q:"Klausurtermine und Abgaben fürs Sommersemester eingetragen?",from:[4,15],to:[6,15],title:"Klausurtermine und Abgaben eintragen"},
+ {id:"pruef-ss",q:"Für die Klausuren im Sommersemester angemeldet?",from:[5,15],to:[7,15],title:"Klausuranmeldung Sommersemester"},
+ {id:"rueck-ws",q:"Semesterbeitrag fürs Wintersemester schon gezahlt?",from:[6,15],to:[9,30],title:"Rückmeldung: Semesterbeitrag Wintersemester zahlen"},
+ {id:"beleg-ws",q:"Kurse fürs Wintersemester belegt?",from:[9,1],to:[10,31],title:"Kurse fürs Wintersemester belegen"}];
+function activeChecks(){if(!state.settings.uniChecks)return[];var now=today(),Y=new Date().getFullYear(),out=[];
+  CHECKS.forEach(function(c){[Y-1,Y].forEach(function(y){
+    var wrap=c.to[0]<c.from[0],a=y+"-"+pad(c.from[0])+"-"+pad(c.from[1]),b=(y+(wrap?1:0))+"-"+pad(c.to[0])+"-"+pad(c.to[1]);
+    if(now<a||now>b)return;var key=c.id+"-"+y,st=state.checks[key]||{};
+    if(st.done||(st.snooze&&st.snooze>now))return;out.push({key:key,c:c,end:b})})});return out}
+function nextSemester(){var now=today(),Y=new Date().getFullYear(),c=[[Y+"-04-01","Sommersemester","1. April"],[Y+"-10-01","Wintersemester","1. Oktober"],[(Y+1)+"-04-01","Sommersemester","1. April"]];
+  for(var i=0;i<c.length;i++)if(c[i][0]>now)return{days:diff(c[i][0],now),name:c[i][1],day:c[i][2]}}
+
+/* ---------- Ansichten ---------- */
+function card(t){var p=progress(t),d=dueInfo(t),n=t.steps?t.steps.length:0,k=n?t.steps.filter(function(s){return s.d}).length:0;
+  return '<button class="task'+(t.done?" done":"")+'" data-act="open" data-id="'+esc(t.id)+'">'+
+   '<span class="row"><span class="title">'+esc(t.title||"Ohne Titel")+'</span>'+(d?'<span class="chip '+d.cls+'">'+esc(d.label)+'</span>':"")+'</span>'+
+   '<span class="prog"><span class="bar'+(t.blocked&&!t.done?" blocked":"")+'"><i style="width:'+p+'%"></i></span><span class="pct">'+p+' %</span></span>'+
+   '<span class="meta"><span class="cat '+esc(t.cat)+'"><i></i>'+esc(CATS[t.cat]||"Privat")+'</span>'+
+     (n?'<span>'+k+' von '+n+' Schritten</span>':"")+(t.due&&d&&d.label!==fmt(t.due)?'<span>'+esc(fmt(t.due))+'</span>':"")+'</span>'+
+   (t.blocked&&!t.done?'<span class="blockline">Wartet auf: '+esc(t.blocked)+'</span>':"")+'</button>'}
+function slotRow(s){var t=task(s.taskId);if(!t)return"";
+  return '<div class="slot"><time>'+esc(s.time||"")+'</time><button class="what" data-act="open" data-id="'+esc(t.id)+'">'+esc(t.title)+
+    ' <span class="note">· '+s.dur+' Min.</span></button><button class="x" data-act="slot-del" data-id="'+esc(s.id)+'" aria-label="Zeitblock entfernen">×</button></div>'}
+function deadlineRow(t){return '<div class="slot deadline"><time>Frist</time><button class="what" data-act="open" data-id="'+esc(t.id)+'">'+esc(t.title)+'</button></div>'}
+function daySlots(d){return state.slots.filter(function(s){return s.date===d&&task(s.taskId)}).sort(function(a,b){return(a.time||"").localeCompare(b.time||"")})}
+
+function viewHeute(){var now=today(),open=state.tasks.filter(function(t){return!t.done});
+  if(!loaded&&!state.tasks.length)return '<div class="empty">Deine Aufgaben werden geladen …</div>';
+  var over=open.filter(function(t){return t.due&&t.due<now}).length,
+      week=open.filter(function(t){return t.due&&t.due>=now&&diff(t.due,now)<=7}).length,
+      blocked=open.filter(function(t){return t.blocked});
+  var h='<div class="stats"><div class="stat'+(over?" crit":"")+'"><b>'+over+'</b><span>überfällig</span></div>'+
+    '<div class="stat'+(week?" warn":"")+'"><b>'+week+'</b><span>fällig in 7 Tagen</span></div>'+
+    '<div class="stat'+(blocked.length?" block":"")+'"><b>'+blocked.length+'</b><span>blockiert</span></div></div>';
+  var checks=activeChecks(),sem=nextSemester();
+  if(checks.length){h+='<section class="section"><h2>Uni-Check</h2>';
+    checks.forEach(function(x){h+='<div class="check"><div class="q">'+esc(x.c.q)+'</div>'+
+      '<div class="ctx">Das '+esc(sem.name)+' beginnt in '+sem.days+' Tagen ('+esc(sem.day)+'). Die Fristen deiner Uni können abweichen.</div>'+
+      '<div class="acts"><button class="btn small primary" data-act="chk-done" data-key="'+x.key+'">Ja, erledigt</button>'+
+      '<button class="btn small" data-act="chk-task" data-key="'+x.key+'" data-id="'+x.c.id+'">Noch nicht, als Aufgabe anlegen</button>'+
+      '<button class="btn small" data-act="chk-snooze" data-key="'+x.key+'">In einer Woche fragen</button></div></div>'});
+    h+='</section>'}
+  var ts=daySlots(now),td=open.filter(function(t){return t.due===now});
+  h+='<section class="section"><h2>Heute</h2>';
+  if(ts.length||td.length)h+='<div class="day today">'+td.map(deadlineRow).join("")+ts.map(slotRow).join("")+'</div>';
+  else h+='<div class="empty">Für heute ist nichts eingeplant. In „Woche“ legst du Zeitblöcke an.</div>';
+  h+='</section>';
+  var next=open.filter(function(t){return t.due}).sort(byDue).slice(0,6);
+  h+='<section class="section"><h2>Nächste Fristen</h2>';
+  h+=next.length?'<div class="list">'+next.map(card).join("")+'</div>':'<div class="empty">Noch keine Aufgabe mit Frist. Mit „+ Aufgabe“ legst du die erste an.</div>';
+  h+='</section>';
+  var bl=blocked.filter(function(t){return next.indexOf(t)<0});
+  if(bl.length)h+='<section class="section"><h2>Wartet auf etwas</h2><div class="list">'+bl.map(card).join("")+'</div></section>';
+  return h}
+
+function viewAufgaben(){var f=ui.filter,all=state.tasks.filter(function(t){return f==="alle"||t.cat===f});
+  var open=all.filter(function(t){return!t.done}).sort(byDue),done=all.filter(function(t){return t.done});
+  var h='<div class="filters">'+[["alle","Alle"],["uni","Uni"],["privat","Privat"],["amt","Behörden & Steuer"]].map(function(x){
+    return '<button data-act="filter" data-f="'+x[0]+'" aria-pressed="'+(f===x[0])+'">'+x[1]+'</button>'}).join("")+'</div>';
+  h+=open.length?'<div class="list">'+open.map(card).join("")+'</div>':'<div class="empty">'+(loaded?"Hier ist nichts offen.":"Deine Aufgaben werden geladen …")+'</div>';
+  if(done.length){h+='<button class="btn small" data-act="toggle-done">'+(ui.showDone?"Erledigte ausblenden":done.length+" erledigte anzeigen")+'</button>';
+    if(ui.showDone)h+='<div class="list">'+done.map(card).join("")+'</div>'}
+  return '<div class="section">'+h+'</div>'}
+
+function weekStart(off){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+off*7);return iso(d)}
+function kw(s){var d=parse(s);d.setDate(d.getDate()+3-((d.getDay()+6)%7));var w1=new Date(d.getFullYear(),0,4);
+  return 1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)}
+function viewWoche(){var start=weekStart(ui.week),now=today();
+  var h='<div class="weeknav"><button class="btn small" data-act="week" data-d="-1" aria-label="Vorherige Woche">←</button>'+
+    '<strong>KW '+kw(start)+' · '+esc(fmt(start))+' bis '+esc(fmt(addDays(start,6)))+'</strong>'+
+    '<button class="btn small" data-act="week" data-d="1" aria-label="Nächste Woche">→</button></div>';
+  for(var i=0;i<7;i++){var d=addDays(start,i),dt=parse(d),
+    dl=state.tasks.filter(function(t){return!t.done&&t.due===d}),sl=daySlots(d);
+    h+='<div class="day'+(d===now?" today":"")+'"><div class="dhead"><span class="dname">'+dt.toLocaleDateString("de-DE",{weekday:"long"})+
+      '<small>'+dt.toLocaleDateString("de-DE",{day:"numeric",month:"short"})+(d===now?" · heute":"")+'</small></span>'+
+      '<button class="btn small" data-act="slot-new" data-date="'+d+'">+ Einplanen</button></div>'+
+      dl.map(deadlineRow).join("")+sl.map(slotRow).join("")+'</div>'}
+  if(ui.week!==0)h+='<button class="btn small" data-act="week" data-d="0">Zur aktuellen Woche</button>';
+  return '<div class="section">'+h+'</div>'}
+
+function viewMehr(){var h='<div class="section">';
+  h+='<div class="card"><label class="switch" for="uniToggle">Uni-Check-Fragen<input type="checkbox" id="uniToggle" data-act="uni-toggle"'+(state.settings.uniChecks?" checked":"")+'></label>'+
+    '<p>Fragt zur passenden Zeit im Semester nach Rückmeldung, Kursbelegung, Klausuranmeldung und Terminen. Die Zeiträume sind typische Werte, keine Fristen deiner Uni.</p></div>';
+  h+='<div class="card"><h3>Erinnerungen im Kalender</h3>';
+  if(inClaude)h+='<p>Der Kalender-Export steht in der Version für den Home-Bildschirm bereit. In dieser Ansicht kann die Seite keine Kalenderdatei übergeben.</p>';
+  else h+='<p>Übergibt alle offenen Fristen und Zeitblöcke an den iPhone-Kalender. Der Kalender erinnert dich 3 Tage vorher, am Vortag und am Tag selbst um 9 Uhr.</p>'+
+    '<div class="rowbtns"><button class="btn primary" data-act="ics-all">Alle Termine in den Kalender</button></div>';
+  h+='</div>';
+  h+='<div class="card"><h3>Sicherung</h3><p>'+(mode==="cloud"?(syncErr?"Die letzte Änderung ist noch nicht gespeichert. Die Seite versucht es erneut.":"Deine Aufgaben liegen in deinem Claude-Konto und erscheinen auf jedem Gerät, auf dem du diese Seite öffnest."):"Deine Aufgaben liegen nur auf diesem Gerät. Sichere sie ab und zu als Datei.")+'</p>'+
+    '<div class="rowbtns">'+((inClaude&&!dl)?"":'<button class="btn" data-act="export">Als Datei sichern</button>')+
+    '<button class="btn" data-act="import">Sicherung einlesen</button><input type="file" id="importFile" accept=".json,application/json" hidden></div>'+
+    '<div class="note" id="backupMsg"></div></div>';
+  return h+'</div>'}
+
+var TITLES={heute:"Fristenbrett",aufgaben:"Aufgaben",woche:"Wochenplan",mehr:"Einstellungen"};
+function render(){
+  $("#dateline").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  $("#viewtitle").textContent=TITLES[ui.tab];
+  $("#newBtn").hidden=ui.tab==="mehr";
+  $("#view").innerHTML=ui.tab==="aufgaben"?viewAufgaben():ui.tab==="woche"?viewWoche():ui.tab==="mehr"?viewMehr():viewHeute();
+  document.querySelectorAll("nav.tabs button").forEach(function(b){if(b.dataset.tab===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+}
+
+/* ---------- Blatt ---------- */
+function sheetTask(t){var p=progress(t),has=t.steps&&t.steps.length;
+  return '<div class="panel" role="dialog" aria-label="Aufgabe bearbeiten"><div class="phead"><h3>Aufgabe</h3><button class="btn small primary" data-act="close">Fertig</button></div>'+
+  '<div class="field"><label for="fTitle">Titel</label><input id="fTitle" data-f="title" type="text" value="'+esc(t.title)+'" placeholder="Was steht an?"></div>'+
+  '<div class="two"><div class="field"><label for="fCat">Bereich</label><select id="fCat" data-f="cat">'+Object.keys(CATS).map(function(k){return '<option value="'+k+'"'+(t.cat===k?" selected":"")+'>'+CATS[k]+'</option>'}).join("")+'</select></div>'+
+  '<div class="field"><label for="fDue">Frist</label><input id="fDue" data-f="due" type="date" value="'+esc(t.due||"")+'"></div></div>'+
+  '<div class="field"><label>Zwischenstand</label><div class="prog"><span class="bar'+(t.blocked?" blocked":"")+'"><i id="pBar" style="width:'+p+'%"></i></span><span class="pct" id="pPct">'+p+' %</span></div>'+
+    (has?"":'<input id="fPct" data-f="pct" type="range" min="0" max="100" step="5" value="'+(t.pct||0)+'" aria-label="Zwischenstand in Prozent">')+'</div>'+
+  '<div class="field"><label>Teilschritte</label><div class="steps">'+(t.steps||[]).map(function(s,i){
+    return '<div class="step'+(s.d?" on":"")+'"><input type="checkbox" id="st'+i+'" data-step="'+i+'"'+(s.d?" checked":"")+' aria-label="Schritt erledigt">'+
+      '<textarea rows="1" id="stt'+i+'" data-steptext="'+i+'" aria-label="Schritt">'+esc(s.t)+'</textarea><button data-act="step-del" data-i="'+i+'" aria-label="Schritt entfernen">×</button></div>'}).join("")+'</div>'+
+    '<div class="addstep"><input id="newStep" type="text" placeholder="Nächster Schritt" aria-label="Neuer Schritt"><button class="btn" data-act="step-add">Hinzufügen</button></div></div>'+
+  '<div class="field"><label for="fBlocked">Blockiert, weil</label><input id="fBlocked" data-f="blocked" type="text" value="'+esc(t.blocked||"")+'" placeholder="Leer lassen, wenn nichts fehlt"></div>'+
+  '<div class="field"><label for="fNote">Notiz</label><textarea id="fNote" data-f="note">'+esc(t.note||"")+'</textarea></div>'+
+  '<div class="rowbtns"><button class="btn" data-act="done-toggle">'+(t.done?"Wieder öffnen":"Als erledigt markieren")+'</button>'+
+    (!inClaude&&t.due?'<button class="btn" data-act="ics-one">In den Kalender</button>':"")+
+    '<button class="btn danger" data-act="del">'+(ui.confirmDel?"Wirklich löschen?":"Löschen")+'</button></div></div>'}
+function sheetSlot(date){var open=state.tasks.filter(function(t){return!t.done}).sort(byDue);
+  if(!open.length)return '<div class="panel" role="dialog"><div class="phead"><h3>Einplanen</h3><button class="btn small" data-act="close">Schließen</button></div><div class="empty">Lege zuerst eine Aufgabe an.</div></div>';
+  return '<div class="panel" role="dialog" aria-label="Zeitblock einplanen"><div class="phead"><h3>Einplanen</h3><button class="btn small" data-act="close">Abbrechen</button></div>'+
+  '<div class="field"><label for="slotTask">Aufgabe</label><select id="slotTask">'+open.map(function(t){return '<option value="'+esc(t.id)+'">'+esc(t.title)+'</option>'}).join("")+'</select></div>'+
+  '<div class="field"><label for="slotDate">Tag</label><input id="slotDate" type="date" value="'+date+'"></div>'+
+  '<div class="two"><div class="field"><label for="slotTime">Beginn</label><input id="slotTime" type="time" value="18:00"></div>'+
+  '<div class="field"><label for="slotDur">Dauer</label><select id="slotDur"><option value="15">15 Min.</option><option value="30">30 Min.</option><option value="45">45 Min.</option><option value="60" selected>1 Std.</option><option value="90">1,5 Std.</option><option value="120">2 Std.</option><option value="180">3 Std.</option></select></div></div>'+
+  '<button class="btn primary" data-act="slot-save">Einplanen</button></div>'}
+function renderSheet(){var el=$("#sheet"),s=ui.sheet;if(!s){el.hidden=true;el.innerHTML="";return}
+  if(s.type==="task"){var t=task(s.id);if(!t){ui.sheet=null;return renderSheet()}el.innerHTML=sheetTask(t)}else el.innerHTML=sheetSlot(s.date);
+  el.hidden=false;el.querySelectorAll(".step textarea").forEach(grow)}
+function grow(a){a.style.height="auto";a.style.height=a.scrollHeight+"px"}
+function openTask(id){ui.sheet={type:"task",id:id};ui.confirmDel=false;renderSheet()}
+function closeSheet(){var s=ui.sheet;if(s&&s.type==="task"){var t=task(s.id);
+  if(t&&!String(t.title).trim()){state.tasks=state.tasks.filter(function(x){return x!==t});save()}}
+  ui.sheet=null;renderSheet();render()}
+function newTask(preset){var t=Object.assign({id:uid(),title:"",cat:ui.filter!=="alle"?ui.filter:"privat",due:"",blocked:"",note:"",steps:[],pct:0,done:false},preset||{});
+  state.tasks.push(t);save();openTask(t.id);if(!t.title){var f=$("#fTitle");if(f)f.focus()}}
+function refreshProgress(t){var p=progress(t),b=$("#pBar"),c=$("#pPct");if(b)b.style.width=p+"%";if(c)c.textContent=p+" %"}
+
+/* ---------- Kalender ---------- */
+function icsEsc(s){return String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n")}
+function buildICS(tasks,slots){var stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Fristenbrett//DE","CALSCALE:GREGORIAN"];
+  function alarm(trig,txt){L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(txt),"TRIGGER:"+trig,"END:VALARM")}
+  tasks.forEach(function(t){if(!t.due||t.done)return;var d=t.due.replace(/-/g,""),e=addDays(t.due,1).replace(/-/g,"");
+    L.push("BEGIN:VEVENT","UID:frist-"+t.id+"@fristenbrett","DTSTAMP:"+stamp,"DTSTART;VALUE=DATE:"+d,"DTEND;VALUE=DATE:"+e,"SUMMARY:"+icsEsc("Frist: "+t.title));
+    var desc=(t.blocked?"Wartet auf: "+t.blocked+"\n":"")+"Stand: "+progress(t)+" %"+(t.note?"\n"+t.note:"");L.push("DESCRIPTION:"+icsEsc(desc));
+    alarm("-P2DT15H","In 3 Tagen fällig: "+t.title);alarm("-PT15H","Morgen fällig: "+t.title);alarm("PT9H","Heute fällig: "+t.title);L.push("END:VEVENT")});
+  slots.forEach(function(s){var t=task(s.taskId);if(!t||t.done||!s.time)return;
+    L.push("BEGIN:VEVENT","UID:block-"+s.id+"@fristenbrett","DTSTAMP:"+stamp,"DTSTART:"+s.date.replace(/-/g,"")+"T"+s.time.replace(":","")+"00","DURATION:PT"+s.dur+"M","SUMMARY:"+icsEsc(t.title));
+    alarm("-PT10M","Gleich: "+t.title);L.push("END:VEVENT")});
+  L.push("END:VCALENDAR");return L.join("\r\n")}
+function openICS(ics){location.href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics)}
+
+/* ---------- Sicherung ---------- */
+function msg(t){var m=$("#backupMsg");if(m)m.textContent=t}
+function exportData(){var name="fristenbrett-"+today()+".json",data=JSON.stringify(state,null,2);
+  if(inClaude){if(!dl)return msg("Sichern ist in dieser Ansicht nicht möglich.");
+    dl.save({filename:name,data:data}).then(function(){msg("Sicherung gespeichert.")},function(e){msg(e&&e.code==="declined"?"Sicherung abgebrochen.":"Sichern hat nicht geklappt. Versuch es später noch einmal.")});return}
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();msg("Sicherung erstellt.")}
+function importData(file){var r=new FileReader();r.onload=function(){try{var s=JSON.parse(r.result);if(!s||!Array.isArray(s.tasks))throw 0;
+    state=normalize(s);save();render();msg(state.tasks.length+" Aufgaben eingelesen.")}catch(e){msg("Die Datei ist keine Fristenbrett-Sicherung.")}};r.readAsText(file)}
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener("click",function(e){
+  if(e.target.id==="sheet"){closeSheet();return}
+  var tab=e.target.closest("[data-tab]");if(tab){ui.tab=tab.dataset.tab;try{localStorage.setItem("fristenbrett-tab",ui.tab)}catch(x){}render();window.scrollTo(0,0);return}
+  var el=e.target.closest("[data-act]");if(!el)return;var a=el.dataset.act,cur=ui.sheet&&ui.sheet.type==="task"?task(ui.sheet.id):null,now=today();
+  if(a==="new")newTask();
+  else if(a==="open")openTask(el.dataset.id);
+  else if(a==="close")closeSheet();
+  else if(a==="filter"){ui.filter=el.dataset.f;render()}
+  else if(a==="toggle-done"){ui.showDone=!ui.showDone;render()}
+  else if(a==="week"){var d=+el.dataset.d;ui.week=d===0?0:ui.week+d;render()}
+  else if(a==="step-add"&&cur){var inp=$("#newStep"),v=inp.value.trim();if(v){cur.steps=cur.steps||[];cur.steps.push({t:v,d:false});save();renderSheet();$("#newStep").focus()}}
+  else if(a==="step-del"&&cur){cur.steps.splice(+el.dataset.i,1);save();renderSheet()}
+  else if(a==="done-toggle"&&cur){cur.done=!cur.done;save();closeSheet()}
+  else if(a==="del"&&cur){if(!ui.confirmDel){ui.confirmDel=true;renderSheet()}else{state.tasks=state.tasks.filter(function(t){return t!==cur});
+      state.slots=state.slots.filter(function(s){return s.taskId!==cur.id});save();ui.sheet=null;renderSheet();render()}}
+  else if(a==="ics-one"&&cur)openICS(buildICS([cur],[]));
+  else if(a==="ics-all")openICS(buildICS(state.tasks,state.slots));
+  else if(a==="slot-new"){ui.sheet={type:"slot",date:el.dataset.date};renderSheet()}
+  else if(a==="slot-save"){var tid=$("#slotTask").value,dd=$("#slotDate").value;if(tid&&dd){state.slots.push({id:uid(),taskId:tid,date:dd,time:$("#slotTime").value||"",dur:+$("#slotDur").value});save()}ui.sheet=null;renderSheet();render()}
+  else if(a==="slot-del"){state.slots=state.slots.filter(function(s){return s.id!==el.dataset.id});save();render()}
+  else if(a==="chk-done"){state.checks[el.dataset.key]={done:true};save();render()}
+  else if(a==="chk-snooze"){state.checks[el.dataset.key]={snooze:addDays(now,7)};save();render()}
+  else if(a==="chk-task"){state.checks[el.dataset.key]={done:true};var c=CHECKS.find(function(x){return x.id===el.dataset.id});newTask({title:c.title,cat:"uni"})}
+  else if(a==="uni-toggle"){state.settings.uniChecks=el.checked;save()}
+  else if(a==="export")exportData();
+  else if(a==="import")$("#importFile").click();
+});
+function onField(e){var el=e.target;
+  if(el.id==="importFile"){if(el.files&&el.files[0])importData(el.files[0]);el.value="";return}
+  if(!ui.sheet||ui.sheet.type!=="task")return;var t=task(ui.sheet.id);if(!t)return;
+  if(el.dataset.f){var f=el.dataset.f;t[f]=f==="pct"?+el.value:el.value;if(f==="pct")refreshProgress(t);
+    if(f==="blocked"&&e.type==="change")renderSheet();save()}
+  else if(el.dataset.step!==undefined&&e.type==="change"){t.steps[+el.dataset.step].d=el.checked;el.closest(".step").classList.toggle("on",el.checked);refreshProgress(t);save()}
+  else if(el.dataset.steptext!==undefined){t.steps[+el.dataset.steptext].t=el.value.replace(/\n/g," ");grow(el);save()}}
+document.addEventListener("input",onField);
+document.addEventListener("change",onField);
+document.addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&e.target.id==="newStep"){e.preventDefault();var b=document.querySelector('[data-act="step-add"]');if(b)b.click()}
+  if(e.key==="Escape"&&ui.sheet)closeSheet()});
+document.addEventListener("visibilitychange",function(){if(document.hidden){clearTimeout(flushT);flush()}else if(!ui.sheet)render()});
+
+init();
+})();
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});</script>
+</body></html>
