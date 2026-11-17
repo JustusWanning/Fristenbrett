@@ -152,6 +152,8 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:color-mix(in
 .addstep{display:flex;gap:8px}
 .addstep input{flex:1;min-width:0;font-size:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .note{font-size:13px;color:var(--muted)}
+.note:empty{display:none}
+.howto{margin:0;padding-left:20px;font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 @media (prefers-reduced-motion:no-preference){ .bar > i{transition:width .25s ease} }
 </style>
 
@@ -337,8 +339,10 @@ function viewMehr(){var h='<div class="section">';
     '<p>Fragt zur passenden Zeit im Semester nach Rückmeldung, Kursbelegung, Klausuranmeldung und Terminen. Die Zeiträume sind typische Werte, keine Fristen deiner Uni.</p></div>';
   h+='<div class="card"><h3>Erinnerungen im Kalender</h3>';
   if(inClaude)h+='<p>Der Kalender-Export steht in der Version für den Home-Bildschirm bereit. In dieser Ansicht kann die Seite keine Kalenderdatei übergeben.</p>';
-  else h+='<p>Übergibt alle offenen Fristen und Zeitblöcke an den iPhone-Kalender. Der Kalender erinnert dich 3 Tage vorher, am Vortag und am Tag selbst um 9 Uhr.</p>'+
-    '<div class="rowbtns"><button class="btn primary" data-act="ics-all">Alle Termine in den Kalender</button></div>';
+  else h+='<p>Erstellt eine Kalenderdatei mit allen offenen Fristen und Zeitblöcken. Der Kalender erinnert dich 3 Tage vorher, am Vortag und am Tag selbst um 9 Uhr.</p>'+
+    '<div class="rowbtns"><button class="btn primary" data-act="ics-all">Kalenderdatei erstellen</button></div>'+
+    '<ol class="howto"><li>Im Teilen-Menü auf „In Dateien sichern“ tippen.</li><li>Die Dateien-App öffnen und auf <b>fristenbrett.ics</b> tippen.</li><li>Termine hinzufügen und den Kalender auswählen.</li></ol>'+
+    '<div class="note icsMsg" role="status"></div>';
   h+='</div>';
   h+='<div class="card"><h3>Sicherung</h3><p>'+(mode==="cloud"?(syncErr?"Die letzte Änderung ist noch nicht gespeichert. Die Seite versucht es erneut.":"Deine Aufgaben liegen in deinem Claude-Konto und erscheinen auf jedem Gerät, auf dem du diese Seite öffnest."):"Deine Aufgaben liegen nur auf diesem Gerät. Sichere sie ab und zu als Datei.")+'</p>'+
     '<div class="rowbtns">'+((inClaude&&!dl)?"":'<button class="btn" data-act="export">Als Datei sichern</button>')+
@@ -370,8 +374,9 @@ function sheetTask(t){var p=progress(t),has=t.steps&&t.steps.length;
   '<div class="field"><label for="fBlocked">Blockiert, weil</label><input id="fBlocked" data-f="blocked" type="text" value="'+esc(t.blocked||"")+'" placeholder="Leer lassen, wenn nichts fehlt"></div>'+
   '<div class="field"><label for="fNote">Notiz</label><textarea id="fNote" data-f="note">'+esc(t.note||"")+'</textarea></div>'+
   '<div class="rowbtns"><button class="btn" data-act="done-toggle">'+(t.done?"Wieder öffnen":"Als erledigt markieren")+'</button>'+
-    (!inClaude&&t.due?'<button class="btn" data-act="ics-one">In den Kalender</button>':"")+
-    '<button class="btn danger" data-act="del">'+(ui.confirmDel?"Wirklich löschen?":"Löschen")+'</button></div></div>'}
+    (!inClaude&&t.due?'<button class="btn" data-act="ics-one">Kalenderdatei</button>':"")+
+    '<button class="btn danger" data-act="del">'+(ui.confirmDel?"Wirklich löschen?":"Löschen")+'</button></div>'+
+  (!inClaude&&t.due?'<div class="note icsMsg" role="status"></div>':"")+'</div>'}
 function sheetSlot(date){var open=state.tasks.filter(function(t){return!t.done}).sort(byDue);
   if(!open.length)return '<div class="panel" role="dialog"><div class="phead"><h3>Einplanen</h3><button class="btn small" data-act="close">Schließen</button></div><div class="empty">Lege zuerst eine Aufgabe an.</div></div>';
   return '<div class="panel" role="dialog" aria-label="Zeitblock einplanen"><div class="phead"><h3>Einplanen</h3><button class="btn small" data-act="close">Abbrechen</button></div>'+
@@ -403,8 +408,19 @@ function buildICS(tasks,slots){var stamp=new Date().toISOString().replace(/[-:]/
   slots.forEach(function(s){var t=task(s.taskId);if(!t||t.done||!s.time)return;
     L.push("BEGIN:VEVENT","UID:block-"+s.id+"@fristenbrett","DTSTAMP:"+stamp,"DTSTART:"+s.date.replace(/-/g,"")+"T"+s.time.replace(":","")+"00","DURATION:PT"+s.dur+"M","SUMMARY:"+icsEsc(t.title));
     alarm("-PT10M","Gleich: "+t.title);L.push("END:VEVENT")});
-  L.push("END:VCALENDAR");return L.join("\r\n")}
-function openICS(ics){location.href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics)}
+  L.push("END:VCALENDAR");return L.map(function(l){var o=[];while(l.length>60){o.push(l.slice(0,60));l=" "+l.slice(60)}o.push(l);return o.join("\r\n")}).join("\r\n")+"\r\n"}
+function icsMsg(t){document.querySelectorAll(".icsMsg").forEach(function(m){m.textContent=t})}
+function openICS(ics,name){var n=(ics.match(/BEGIN:VEVENT/g)||[]).length,file=null;
+  if(!n){icsMsg("Keine offenen Termine mit Frist oder Uhrzeit vorhanden.");return}
+  try{file=new File([ics],name,{type:"text/calendar"})}catch(e){}
+  if(file&&navigator.canShare&&navigator.share){var ok=false;try{ok=navigator.canShare({files:[file]})}catch(e){}
+    if(ok){navigator.share({files:[file],title:name}).then(function(){icsMsg(n+(n===1?" Termin":" Termine")+" weitergegeben. Öffne die Datei jetzt in der Dateien-App.")},
+      function(e){if(e&&e.name==="AbortError")icsMsg("Teilen abgebrochen.");else icsDownload(ics,name,n)});return}}
+  icsDownload(ics,name,n)}
+function icsDownload(ics,name,n){try{var u=URL.createObjectURL(new Blob([ics],{type:"text/calendar"})),a=document.createElement("a");
+    a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},60000);
+    icsMsg(n+(n===1?" Termin":" Termine")+" als Datei gespeichert. Du findest sie in der Dateien-App unter Downloads.")}
+  catch(e){icsMsg("Die Kalenderdatei konnte nicht erstellt werden.")}}
 
 /* ---------- Sicherung ---------- */
 function msg(t){var m=$("#backupMsg");if(m)m.textContent=t}
@@ -431,8 +447,8 @@ document.addEventListener("click",function(e){
   else if(a==="done-toggle"&&cur){cur.done=!cur.done;save();closeSheet()}
   else if(a==="del"&&cur){if(!ui.confirmDel){ui.confirmDel=true;renderSheet()}else{state.tasks=state.tasks.filter(function(t){return t!==cur});
       state.slots=state.slots.filter(function(s){return s.taskId!==cur.id});save();ui.sheet=null;renderSheet();render()}}
-  else if(a==="ics-one"&&cur)openICS(buildICS([cur],[]));
-  else if(a==="ics-all")openICS(buildICS(state.tasks,state.slots));
+  else if(a==="ics-one"&&cur)openICS(buildICS([cur],[]),"frist.ics");
+  else if(a==="ics-all")openICS(buildICS(state.tasks,state.slots),"fristenbrett.ics");
   else if(a==="slot-new"){ui.sheet={type:"slot",date:el.dataset.date};renderSheet()}
   else if(a==="slot-save"){var tid=$("#slotTask").value,dd=$("#slotDate").value;if(tid&&dd){state.slots.push({id:uid(),taskId:tid,date:dd,time:$("#slotTime").value||"",dur:+$("#slotDur").value});save()}ui.sheet=null;renderSheet();render()}
   else if(a==="slot-del"){state.slots=state.slots.filter(function(s){return s.id!==el.dataset.id});save();render()}
@@ -460,5 +476,6 @@ document.addEventListener("visibilitychange",function(){if(document.hidden){clea
 init();
 })();
 </script>
+
 <script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 </body></html>

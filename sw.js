@@ -1,5 +1,5 @@
 // Offline: Seite aus dem Netz laden, wenn möglich; sonst die zuletzt gespeicherte Kopie.
-const CACHE = "fristenbrett-v1";
+const CACHE = "fristenbrett-v2";
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "manifest.webmanifest", "icon-180.png"])).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {
