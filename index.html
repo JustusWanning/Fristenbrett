@@ -211,15 +211,17 @@ function progress(t){if(t.done)return 100;if(t.steps&&t.steps.length)return Math
 function dueInfo(t){if(!t.due)return null;var n=diff(t.due,today());
   if(t.done)return{cls:"okc",label:"erledigt"};
   if(n<0)return{cls:"crit",label:"überfällig seit "+(-n)+(n===-1?" Tag":" Tagen")};
-  if(n===0)return{cls:"crit",label:"heute fällig"};
-  if(n===1)return{cls:"warn",label:"morgen fällig"};
+  if(n===0)return{cls:"crit",label:t.time?"heute "+t.time+" Uhr":"heute fällig"};
+  if(n===1)return{cls:"warn",label:t.time?"morgen "+t.time+" Uhr":"morgen fällig"};
   if(n<=3)return{cls:"warn",label:"in "+n+" Tagen"};
   if(n<=14)return{cls:"soon",label:"in "+n+" Tagen"};
   if(n<=60)return{cls:"",label:"in "+Math.round(n/7)+" Wochen"};
   return{cls:"",label:fmt(t.due)}}
 function normalize(s){s=s||{};return{tasks:Array.isArray(s.tasks)?s.tasks:[],slots:Array.isArray(s.slots)?s.slots:[],
   checks:s.checks&&typeof s.checks==="object"?s.checks:{},settings:Object.assign({uniChecks:true},s.settings||{})}}
-function byDue(a,b){return(a.due||"9999").localeCompare(b.due||"9999")}
+function dueKey(t){return t.due?t.due+" "+(t.time||"99:99"):"9999"}
+function byDue(a,b){return dueKey(a).localeCompare(dueKey(b))}
+function whenTxt(t){return fmt(t.due)+(t.time?", "+t.time+" Uhr":"")}
 
 /* ---------- Speichern ---------- */
 function cacheWrite(){try{localStorage.setItem("fristenbrett",JSON.stringify(state))}catch(e){}}
@@ -272,12 +274,12 @@ function card(t){var p=progress(t),d=dueInfo(t),n=t.steps?t.steps.length:0,k=n?t
    '<span class="row"><span class="title">'+esc(t.title||"Ohne Titel")+'</span>'+(d?'<span class="chip '+d.cls+'">'+esc(d.label)+'</span>':"")+'</span>'+
    '<span class="prog"><span class="bar'+(t.blocked&&!t.done?" blocked":"")+'"><i style="width:'+p+'%"></i></span><span class="pct">'+p+' %</span></span>'+
    '<span class="meta"><span class="cat '+esc(t.cat)+'"><i></i>'+esc(CATS[t.cat]||"Privat")+'</span>'+
-     (n?'<span>'+k+' von '+n+' Schritten</span>':"")+(t.due&&d&&d.label!==fmt(t.due)?'<span>'+esc(fmt(t.due))+'</span>':"")+'</span>'+
+     (n?'<span>'+k+' von '+n+' Schritten</span>':"")+(t.due&&d&&(t.time||d.label!==fmt(t.due))&&d.label.indexOf(t.time||"\u0000")<0?'<span>'+esc(whenTxt(t))+'</span>':"")+'</span>'+
    (t.blocked&&!t.done?'<span class="blockline">Wartet auf: '+esc(t.blocked)+'</span>':"")+'</button>'}
 function slotRow(s){var t=task(s.taskId);if(!t)return"";
   return '<div class="slot"><time>'+esc(s.time||"")+'</time><button class="what" data-act="open" data-id="'+esc(t.id)+'">'+esc(t.title)+
     ' <span class="note">· '+s.dur+' Min.</span></button><button class="x" data-act="slot-del" data-id="'+esc(s.id)+'" aria-label="Zeitblock entfernen">×</button></div>'}
-function deadlineRow(t){return '<div class="slot deadline"><time>Frist</time><button class="what" data-act="open" data-id="'+esc(t.id)+'">'+esc(t.title)+'</button></div>'}
+function deadlineRow(t){return '<div class="slot deadline"><time>'+esc(t.time||"Frist")+'</time><button class="what" data-act="open" data-id="'+esc(t.id)+'">'+(t.time?"Frist: ":"")+esc(t.title)+'</button></div>'}
 function daySlots(d){return state.slots.filter(function(s){return s.date===d&&task(s.taskId)}).sort(function(a,b){return(a.time||"").localeCompare(b.time||"")})}
 
 function viewHeute(){var now=today(),open=state.tasks.filter(function(t){return!t.done});
@@ -339,7 +341,7 @@ function viewMehr(){var h='<div class="section">';
     '<p>Fragt zur passenden Zeit im Semester nach Rückmeldung, Kursbelegung, Klausuranmeldung und Terminen. Die Zeiträume sind typische Werte, keine Fristen deiner Uni.</p></div>';
   h+='<div class="card"><h3>Erinnerungen im Kalender</h3>';
   if(inClaude)h+='<p>Der Kalender-Export steht in der Version für den Home-Bildschirm bereit. In dieser Ansicht kann die Seite keine Kalenderdatei übergeben.</p>';
-  else h+='<p>Erstellt eine Kalenderdatei mit allen offenen Fristen und Zeitblöcken. Der Kalender erinnert dich 3 Tage vorher, am Vortag und am Tag selbst um 9 Uhr.</p>'+
+  else h+='<p>Erstellt eine Kalenderdatei mit allen offenen Fristen und Zeitblöcken. Der Kalender erinnert dich eine Woche vorher und am Vortag, jeweils zur eingetragenen Uhrzeit oder ohne Uhrzeit um 9 Uhr.</p>'+
     '<div class="rowbtns"><button class="btn primary" data-act="cal-all">Im Kalender öffnen</button><button class="btn" data-act="ics-all">Datei teilen</button></div>'+
     '<p><b>Im Kalender öffnen</b> zeigt die Termine direkt in der Kalender-Vorschau. Erscheint dort nur Text oder eine leere Seite, schließe die App und öffne sie neu.</p>'+
     '<p><b>Datei teilen</b>, falls das nicht klappt:</p>'+
@@ -365,8 +367,9 @@ function render(){
 function sheetTask(t){var p=progress(t),has=t.steps&&t.steps.length;
   return '<div class="panel" role="dialog" aria-label="Aufgabe bearbeiten"><div class="phead"><h3>Aufgabe</h3><button class="btn small primary" data-act="close">Fertig</button></div>'+
   '<div class="field"><label for="fTitle">Titel</label><input id="fTitle" data-f="title" type="text" value="'+esc(t.title)+'" placeholder="Was steht an?"></div>'+
-  '<div class="two"><div class="field"><label for="fCat">Bereich</label><select id="fCat" data-f="cat">'+Object.keys(CATS).map(function(k){return '<option value="'+k+'"'+(t.cat===k?" selected":"")+'>'+CATS[k]+'</option>'}).join("")+'</select></div>'+
-  '<div class="field"><label for="fDue">Frist</label><input id="fDue" data-f="due" type="date" value="'+esc(t.due||"")+'"></div></div>'+
+  '<div class="field"><label for="fCat">Bereich</label><select id="fCat" data-f="cat">'+Object.keys(CATS).map(function(k){return '<option value="'+k+'"'+(t.cat===k?" selected":"")+'>'+CATS[k]+'</option>'}).join("")+'</select></div>'+
+  '<div class="two"><div class="field"><label for="fDue">Frist</label><input id="fDue" data-f="due" type="date" value="'+esc(t.due||"")+'"></div>'+
+  '<div class="field"><label for="fTime">Uhrzeit (optional)</label><input id="fTime" data-f="time" type="time" value="'+esc(t.time||"")+'"></div></div>'+
   '<div class="field"><label>Zwischenstand</label><div class="prog"><span class="bar'+(t.blocked?" blocked":"")+'"><i id="pBar" style="width:'+p+'%"></i></span><span class="pct" id="pPct">'+p+' %</span></div>'+
     (has?"":'<input id="fPct" data-f="pct" type="range" min="0" max="100" step="5" value="'+(t.pct||0)+'" aria-label="Zwischenstand in Prozent">')+'</div>'+
   '<div class="field"><label>Teilschritte</label><div class="steps">'+(t.steps||[]).map(function(s,i){
@@ -403,10 +406,14 @@ function refreshProgress(t){var p=progress(t),b=$("#pBar"),c=$("#pPct");if(b)b.s
 function icsEsc(s){return String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n")}
 function buildICS(tasks,slots){var stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Fristenbrett//DE","CALSCALE:GREGORIAN"];
   function alarm(trig,txt){L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(txt),"TRIGGER:"+trig,"END:VALARM")}
-  tasks.forEach(function(t){if(!t.due||t.done)return;var d=t.due.replace(/-/g,""),e=addDays(t.due,1).replace(/-/g,"");
-    L.push("BEGIN:VEVENT","UID:frist-"+t.id+"@fristenbrett","DTSTAMP:"+stamp,"DTSTART;VALUE=DATE:"+d,"DTEND;VALUE=DATE:"+e,"SUMMARY:"+icsEsc("Frist: "+t.title));
+  tasks.forEach(function(t){if(!t.due||t.done)return;var d=t.due.replace(/-/g,""),e=addDays(t.due,1).replace(/-/g,""),tm=/^\d\d:\d\d$/.test(t.time||"");
+    L.push("BEGIN:VEVENT","UID:frist-"+t.id+"@fristenbrett","DTSTAMP:"+stamp);
+    if(tm)L.push("DTSTART:"+d+"T"+t.time.replace(":","")+"00","DURATION:PT30M");else L.push("DTSTART;VALUE=DATE:"+d,"DTEND;VALUE=DATE:"+e);
+    L.push("SUMMARY:"+icsEsc("Frist: "+t.title));
     var desc=(t.blocked?"Wartet auf: "+t.blocked+"\n":"")+"Stand: "+progress(t)+" %"+(t.note?"\n"+t.note:"");L.push("DESCRIPTION:"+icsEsc(desc));
-    alarm("-P2DT15H","In 3 Tagen fällig: "+t.title);alarm("-PT15H","Morgen fällig: "+t.title);alarm("PT9H","Heute fällig: "+t.title);L.push("END:VEVENT")});
+    if(tm){alarm("-P7D","In einer Woche fällig: "+t.title);alarm("-P1D","Morgen fällig: "+t.title)}
+    else{alarm("-P6DT15H","In einer Woche fällig: "+t.title);alarm("-PT15H","Morgen fällig: "+t.title)}
+    L.push("END:VEVENT")});
   slots.forEach(function(s){var t=task(s.taskId);if(!t||t.done||!s.time)return;
     L.push("BEGIN:VEVENT","UID:block-"+s.id+"@fristenbrett","DTSTAMP:"+stamp,"DTSTART:"+s.date.replace(/-/g,"")+"T"+s.time.replace(":","")+"00","DURATION:PT"+s.dur+"M","SUMMARY:"+icsEsc(t.title));
     alarm("-PT10M","Gleich: "+t.title);L.push("END:VEVENT")});
