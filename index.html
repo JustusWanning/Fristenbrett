@@ -132,21 +132,24 @@ nav.tabs button{border:0;background:none;padding:10px 4px;font-size:13px;font-we
 nav.tabs button[aria-current="page"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
 
 /* Blatt */
-#sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;background:color-mix(in srgb,#000 45%,transparent)}
-.panel{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;
+#sheet{position:fixed;inset:0;z-index:30;overscroll-behavior:contain;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;background:color-mix(in srgb,#000 45%,transparent)}
+.panel{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;min-width:0;border-radius:18px 18px 0 0;
   padding:16px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   display:flex;flex-direction:column;gap:14px}
 .panel .phead{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
 .field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.field input,.field select,.field textarea{font-size:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:44px}
+.field input,.field select,.field textarea{font-size:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0;max-width:100%;min-height:44px}
+.field input[type=date],.field input[type=time]{-webkit-appearance:none;appearance:none;display:block;text-align:left;line-height:1.4}
+.field input::-webkit-date-and-time-value{text-align:left;margin:0}
+body.locked{overflow:hidden}
 .field textarea{min-height:76px;resize:vertical}
 .field input[type=range]{padding:0;border:0;background:none;accent-color:var(--accent)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .steps{display:flex;flex-direction:column;gap:6px}
 .step{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 10px}
 .step input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--accent)}
-.step textarea{flex:1;min-width:0;border:0;background:none;font-size:16px;line-height:1.35;padding:8px 0;resize:none;overflow:hidden;field-sizing:content}
+.step textarea{flex:1;min-width:0;-webkit-hyphens:auto;hyphens:auto;border:0;background:none;font-size:16px;line-height:1.35;padding:8px 0;resize:none;overflow:hidden;field-sizing:content}
 .step.on textarea{text-decoration:line-through;color:var(--muted)}
 .step button{border:0;background:none;color:var(--muted);font-size:18px;min-width:40px;min-height:40px}
 .addstep{display:flex;gap:8px}
@@ -390,7 +393,7 @@ function sheetSlot(date){var open=state.tasks.filter(function(t){return!t.done})
   '<div class="two"><div class="field"><label for="slotTime">Beginn</label><input id="slotTime" type="time" value="18:00"></div>'+
   '<div class="field"><label for="slotDur">Dauer</label><select id="slotDur"><option value="15">15 Min.</option><option value="30">30 Min.</option><option value="45">45 Min.</option><option value="60" selected>1 Std.</option><option value="90">1,5 Std.</option><option value="120">2 Std.</option><option value="180">3 Std.</option></select></div></div>'+
   '<button class="btn primary" data-act="slot-save">Einplanen</button></div>'}
-function renderSheet(){var el=$("#sheet"),s=ui.sheet;if(!s){el.hidden=true;el.innerHTML="";return}
+function renderSheet(){var el=$("#sheet"),s=ui.sheet;document.body.classList.toggle("locked",!!s);if(!s){el.hidden=true;el.innerHTML="";return}
   if(s.type==="task"){var t=task(s.id);if(!t){ui.sheet=null;return renderSheet()}el.innerHTML=sheetTask(t)}else el.innerHTML=sheetSlot(s.date);
   el.hidden=false;el.querySelectorAll(".step textarea").forEach(grow)}
 function grow(a){a.style.height="auto";a.style.height=a.scrollHeight+"px"}
