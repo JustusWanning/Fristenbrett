@@ -95,13 +95,50 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .chip.warn{color:var(--due-ink);border-color:var(--due);background:var(--due)}
 .chip.soon{color:var(--ink);background:color-mix(in srgb,var(--ink) 7%,transparent);border-color:transparent}
 .chip.okc{color:var(--ok);border-color:var(--ok)}
-.bar{height:8px;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.bar{position:relative;height:8px;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.bar .soll{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:var(--ink);opacity:.75;border-radius:2px}
 .bar > i{display:block;height:100%;background:var(--accent);border-radius:999px}
 .bar.blocked > i{background:repeating-linear-gradient(135deg,var(--block) 0 6px,color-mix(in srgb,var(--block) 45%,transparent) 6px 12px)}
 .prog{display:flex;align-items:center;gap:10px}
 .prog .bar{flex:1}
 .prog .pct{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;min-width:38px;text-align:right}
 .blockline{font-size:13px;color:var(--block);font-weight:500;overflow-wrap:anywhere}
+
+/* Projekte */
+.nextline{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.nextline b{font-weight:600}
+.pinfo{--cc:var(--c-uni);background:var(--surface);border-radius:12px;overflow:hidden;padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;
+  box-shadow:0 1px 0 var(--line),0 2px 8px color-mix(in srgb,var(--ink) 8%,transparent)}
+.pinfo.cat-privat{--cc:var(--c-privat)} .pinfo.cat-amt{--cc:var(--c-amt)}
+.pinfo::before{content:"";display:block;height:6px;margin:0 -14px 2px;background:var(--cc)}
+.pinfo .ptitle{font-family:var(--display);font-weight:700;font-size:20px;line-height:1.2;text-wrap:balance}
+.pinfo .pdue{font-size:14px} .pinfo .pnote{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.pinfo .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.legend{font-size:12px;color:var(--muted)}
+.kw{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 14px 6px;display:flex;flex-direction:column}
+.kw > h3,.kw > .khead{font-family:var(--body);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:8px 0 4px}
+.kw.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.kw.now > h3{color:var(--accent)}
+.kw.late{border-color:var(--crit);box-shadow:inset 0 0 0 1px var(--crit)}
+.kw.late > h3{color:var(--crit)}
+.khead{display:flex;justify-content:space-between;align-items:center;gap:8px;background:none;border:0;width:100%;text-align:left}
+.khead .ptitle{font-family:var(--display);font-size:16px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink)}
+.pstep{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--line);min-width:0}
+.kw > h3 + .pstep,.kw > .khead + .pstep,.kw > .prog + .pstep,.day .pstep:first-of-type{border-top:0}
+.pstep input[type=checkbox]{width:22px;height:22px;flex:none;margin:1px 0 0;accent-color:var(--accent)}
+.pstep .ptext{flex:1;min-width:0;text-align:left;background:none;border:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.pstep .pt{font-size:15px;line-height:1.35;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
+.pstep.type-termin .pt,.pstep.type-meilenstein .pt{font-weight:600}
+.pstep.done .pt{text-decoration:line-through;color:var(--muted);font-weight:400}
+.pmeta{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center;font-size:12px;color:var(--muted)}
+.pmeta .late{color:var(--crit);font-weight:700}
+.pmeta .soonish{color:var(--ink);font-weight:700}
+.tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:5px;padding:2px 6px;line-height:1.3}
+.tag.termin{background:var(--accent);color:var(--accent-ink)}
+.tag.meilenstein{background:var(--ink);color:var(--bg)}
+.pstep.done .tag{opacity:.5}
+code{font-size:12px;background:color-mix(in srgb,var(--ink) 8%,transparent);border-radius:4px;padding:1px 4px;overflow-wrap:anywhere}
+#planText{min-height:220px;font-size:14px}
 
 /* Uni-Check */
 .check{background:color-mix(in srgb,var(--c-uni) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--c-uni) 40%,var(--line));
@@ -139,9 +176,9 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* Leiste unten */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(4,1fr);
+  display:grid;grid-template-columns:repeat(5,1fr);
   padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
-nav.tabs button{border:0;background:none;padding:10px 4px;font-size:13px;font-weight:600;color:var(--muted);border-radius:10px;min-height:48px}
+nav.tabs button{border:0;background:none;padding:10px 2px;font-size:12.5px;font-weight:600;color:var(--muted);border-radius:10px;min-height:48px}
 nav.tabs button[aria-current="page"]{color:var(--accent-ink);background:var(--accent)}
 
 /* Blatt */
@@ -183,6 +220,7 @@ body.locked{overflow:hidden}
 <nav class="tabs" aria-label="Ansichten">
   <button data-tab="heute">Heute</button>
   <button data-tab="aufgaben">Aufgaben</button>
+  <button data-tab="projekte">Projekte</button>
   <button data-tab="woche">Woche</button>
   <button data-tab="mehr">Mehr</button>
 </nav>
@@ -204,10 +242,10 @@ var STARTER={tasks:[{id:"steuer2023",title:"Steuererklärung 2023",cat:"amt",due
    {t:"Erklärung in ELSTER ausfüllen",d:false},
    {t:"Abschicken",d:false},
    {t:"Steuerbescheid prüfen",d:false}]}],
-  slots:[],checks:{},settings:{uniChecks:true}};
+  projects:[],slots:[],checks:{},settings:{uniChecks:true}};
 
-var state={tasks:[],slots:[],checks:{},settings:{uniChecks:true}};
-var ui={tab:"heute",filter:"alle",week:0,sheet:null,confirmDel:false,showDone:false};
+var state={tasks:[],projects:[],slots:[],checks:{},settings:{uniChecks:true}};
+var ui={tab:"heute",filter:"alle",week:0,sheet:null,confirmDel:false,showDone:false,project:null,hideDone:false,scrollNow:false};
 var loaded=false,mode="local",docRef=null,dirty=false,writing=false,syncErr=false,flushT=null,dl=null;
 
 /* ---------- Helfer ---------- */
@@ -233,7 +271,7 @@ function dueInfo(t){if(!t.due)return null;var n=diff(t.due,today());
   if(n<=14)return{cls:"soon",label:"in "+n+" Tagen"};
   if(n<=60)return{cls:"",label:"in "+Math.round(n/7)+" Wochen"};
   return{cls:"",label:fmt(t.due)}}
-function normalize(s){s=s||{};return{tasks:Array.isArray(s.tasks)?s.tasks:[],slots:Array.isArray(s.slots)?s.slots:[],
+function normalize(s){s=s||{};return{tasks:Array.isArray(s.tasks)?s.tasks:[],projects:Array.isArray(s.projects)?s.projects:[],slots:Array.isArray(s.slots)?s.slots:[],
   checks:s.checks&&typeof s.checks==="object"?s.checks:{},settings:Object.assign({uniChecks:true},s.settings||{})}}
 function dueKey(t){return t.due?t.due+" "+(t.time||"99:99"):"9999"}
 function byDue(a,b){return dueKey(a).localeCompare(dueKey(b))}
@@ -247,7 +285,7 @@ function flush(){if(!docRef||writing||!dirty)return;writing=true;dirty=false;
   docRef.set(JSON.parse(JSON.stringify(state))).then(function(){syncErr=false},function(){syncErr=true;dirty=true})
   .then(function(){writing=false;if(dirty){clearTimeout(flushT);flushT=setTimeout(flush,syncErr?8000:600)}if(ui.tab==="mehr"&&!ui.sheet)render()})}
 function init(){
-  try{var t=localStorage.getItem("fristenbrett-tab");if(t)ui.tab=t}catch(e){}
+  try{var t=localStorage.getItem("fristenbrett-tab");if(t)ui.tab=t;ui.project=localStorage.getItem("fristenbrett-projekt")||null}catch(e){}
   var cached=cacheRead();if(cached)state=cached;
   if(!inClaude){if(!cached)state=normalize(JSON.parse(JSON.stringify(STARTER)));loaded=true;cacheWrite();render();return}
   render();
@@ -260,7 +298,7 @@ function init(){
       if(dirty||writing){loaded=true;return}
       if(snap.exists){var next=normalize(JSON.parse(JSON.stringify(snap.data())));
         if(JSON.stringify(next)!==JSON.stringify(state)){state=next;cacheWrite();loaded=true;render();return}}
-      else if(state.tasks.length){dirty=true;flush()}
+      else if(state.tasks.length||state.projects.length){dirty=true;flush()}
       if(!loaded){loaded=true;render()}
     },function(){clearTimeout(timer);mode="local";syncErr=true;loaded=true;render()});
   },function(){clearTimeout(timer);loaded=true;render()});
@@ -284,6 +322,56 @@ function activeChecks(){if(!state.settings.uniChecks)return[];var now=today(),Y=
 function nextSemester(){var now=today(),Y=new Date().getFullYear(),c=[[Y+"-04-01","Sommersemester","1. April"],[Y+"-10-01","Wintersemester","1. Oktober"],[(Y+1)+"-04-01","Sommersemester","1. April"]];
   for(var i=0;i<c.length;i++)if(c[i][0]>now)return{days:diff(c[i][0],now),name:c[i][1],day:c[i][2]}}
 
+/* ---------- Projekte ---------- */
+var TYPES={aufgabe:"Aufgabe",termin:"Termin",meilenstein:"Meilenstein"};
+function project(id){return state.projects.find(function(p){return p.id===id})}
+function pStep(p,id){return p&&(p.steps||[]).find(function(s){return s.id===id})}
+function stepKey(s){return(s.date||"9999")+" "+(s.time||"99:99")}
+function pSteps(p){return(p.steps||[]).slice().sort(function(a,b){return stepKey(a).localeCompare(stepKey(b))})}
+function pShort(p){var t=String(p.title||"Projekt"),i=t.search(/\s[–—-]\s/);return i>0?t.slice(0,i):(t.length>24?t.slice(0,22)+"…":t)}
+function pStats(p){var now=today(),st=p.steps||[];
+  return{total:st.length,done:st.filter(function(s){return s.d}).length,
+    soll:st.filter(function(s){return s.date&&s.date<=now}).length,
+    late:st.filter(function(s){return!s.d&&s.date&&s.date<now}).length,
+    next:pSteps(p).find(function(s){return!s.d})}}
+function openSteps(){var out=[];state.projects.forEach(function(p){(p.steps||[]).forEach(function(s){if(!s.d&&s.date)out.push({p:p,s:s})})});
+  return out.sort(function(a,b){return stepKey(a.s).localeCompare(stepKey(b.s))})}
+function weekOf(s){var d=parse(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return iso(d)}
+function fmtShort(s){return parse(s).toLocaleDateString("de-DE",{day:"numeric",month:"short"})}
+function daysLeft(s){var n=diff(s,today());return n<0?"seit "+(-n)+(n===-1?" Tag":" Tagen")+" vorbei":n===0?"heute":n===1?"morgen":"noch "+n+" Tage"}
+function stepWhen(s,withDate){var n=diff(s.date,today()),t=(withDate?fmt(s.date):"")+(s.time?(withDate?", ":"")+s.time+" Uhr":"");
+  if(!s.d&&n<0)return'<span class="late">überfällig seit '+(-n)+(n===-1?" Tag":" Tagen")+'</span>'+(withDate?'<span>'+esc(t)+'</span>':"");
+  if(!s.d&&n===0)return'<span class="late">heute dran</span>'+(s.time?'<span>'+esc(s.time)+' Uhr</span>':"");
+  if(!s.d&&n===1)return'<span class="soonish">morgen</span>'+(s.time?'<span>'+esc(s.time)+' Uhr</span>':"");
+  return(t?'<span>'+esc(t)+'</span>':"")+(!s.d&&n>1&&n<=7?'<span class="soonish">in '+n+' Tagen</span>':"")}
+function stepRow(p,s,o){o=o||{};
+  return'<div class="pstep type-'+esc(s.type||"aufgabe")+(s.d?" done":"")+'"><input type="checkbox" data-pstep="'+esc(p.id)+'|'+esc(s.id)+'"'+(s.d?" checked":"")+' aria-label="Erledigt">'+
+   '<button class="ptext" data-act="pstep-edit" data-p="'+esc(p.id)+'" data-s="'+esc(s.id)+'"><span class="pt">'+esc(s.t||"Ohne Text")+'</span>'+
+   '<span class="pmeta">'+(s.type&&s.type!=="aufgabe"?'<span class="tag '+esc(s.type)+'">'+esc(TYPES[s.type]||"")+'</span>':"")+
+   (s.date?stepWhen(s,o.date!==false):"")+(o.proj?'<span class="cat '+esc(p.cat)+'"><i></i>'+esc(pShort(p))+'</span>':"")+'</span></button></div>'}
+function sollBar(st){var pd=st.total?Math.round(st.done/st.total*100):0,ps=st.total?Math.round(st.soll/st.total*100):0;
+  return'<span class="prog"><span class="bar"><i style="width:'+pd+'%"></i>'+(st.total?'<b class="soll" style="left:'+ps+'%"></b>':"")+'</span><span class="pct">'+pd+' %</span></span>'}
+function planChip(st){if(st.total&&st.done===st.total)return'<span class="chip okc">fertig</span>';
+  if(st.late)return'<span class="chip crit">'+st.late+' im Verzug</span>';return'<span class="chip okc">im Plan</span>'}
+function projCard(p){var st=pStats(p),d=p.due?dueInfo({due:p.due}):null;
+  return'<button class="task cat-'+(CATS[p.cat]?p.cat:"uni")+'" data-act="proj-open" data-id="'+esc(p.id)+'">'+
+   '<span class="row"><span class="title">'+esc(p.title||"Projekt")+'</span>'+planChip(st)+'</span>'+sollBar(st)+
+   '<span class="meta"><span>'+st.done+' von '+st.total+' erledigt, Soll bis heute: '+st.soll+'</span>'+(p.due?'<span>Abgabe '+esc(fmtShort(p.due))+(d?" · "+esc(d.label):"")+'</span>':"")+'</span>'+
+   (st.next?'<span class="nextline"><b>Nächster Schritt:</b> '+esc(st.next.t)+(st.next.date?' · '+esc(fmt(st.next.date)):"")+'</span>':"")+'</button>'}
+function parseDate(x){var m=x.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return x;m=x.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);
+  if(m)return(m[3].length===2?"20"+m[3]:m[3])+"-"+pad(+m[2])+"-"+pad(+m[1]);return""}
+function parsePlan(txt){var out={title:"",due:"",notes:[],steps:[]},DT="(\\d{4}-\\d{2}-\\d{2}|\\d{1,2}\\.\\d{1,2}\\.\\d{2,4})";
+  var rx=new RegExp("^"+DT+"(?:\\s+(\\d{1,2}:\\d{2}))?(?:\\s*[|;\\t]\\s*|\\s+)(.+)$"),ab=new RegExp("abgabe\\s*:?\\s*"+DT,"i");
+  String(txt||"").split(/\r?\n/).forEach(function(l){l=l.trim().replace(/^[-•*]\s+/,"");if(!l)return;var m=l.match(rx);
+    if(m){var parts=m[3].split(/\s*\|\s*/),type="aufgabe",first=parts[0].toLowerCase();
+      if(parts.length>1&&/^(aufgabe|todo|task|termin|gespräch|meeting|meilenstein|milestone)$/.test(first)){parts.shift();
+        type=/termin|gespräch|meeting/.test(first)?"termin":/meilenstein|milestone/.test(first)?"meilenstein":"aufgabe"}
+      var tm=m[2]?(m[2].length===4?"0"+m[2]:m[2]):"";
+      out.steps.push({id:uid()+out.steps.length,date:parseDate(m[1]),time:tm,type:type,t:parts.join(" | "),d:false});return}
+    var a=l.match(ab);if(a){out.due=parseDate(a[1]);var rest=l.split(/\s*\|\s*/).filter(function(x){return!ab.test(x)});if(rest.length)out.notes.push(rest.join("\n"));return}
+    if(!out.title)out.title=l;else out.notes.push(l)});
+  return out}
+
 /* ---------- Ansichten ---------- */
 function card(t){var p=progress(t),d=dueInfo(t),n=t.steps?t.steps.length:0,k=n?t.steps.filter(function(s){return s.d}).length:0;
   return '<button class="task cat-'+(CATS[t.cat]?t.cat:"privat")+(t.done?" done":"")+'" data-act="open" data-id="'+esc(t.id)+'">'+
@@ -300,8 +388,9 @@ function daySlots(d){return state.slots.filter(function(s){return s.date===d&&ta
 
 function viewHeute(){var now=today(),open=state.tasks.filter(function(t){return!t.done});
   if(!loaded&&!state.tasks.length)return '<div class="empty">Deine Aufgaben werden geladen …</div>';
-  var over=open.filter(function(t){return t.due&&t.due<now}).length,
-      week=open.filter(function(t){return t.due&&t.due>=now&&diff(t.due,now)<=7}).length,
+  var os=openSteps(),
+      over=open.filter(function(t){return t.due&&t.due<now}).length+os.filter(function(x){return x.s.date<now}).length,
+      week=open.filter(function(t){return t.due&&t.due>=now&&diff(t.due,now)<=7}).length+os.filter(function(x){return x.s.date>=now&&diff(x.s.date,now)<=7}).length,
       blocked=open.filter(function(t){return t.blocked});
   var h='<div class="stats"><div class="stat'+(over?" crit":"")+'"><b>'+over+'</b><span>überfällig</span></div>'+
     '<div class="stat'+(week?" warn":"")+'"><b>'+week+'</b><span>fällig in 7 Tagen</span></div>'+
@@ -314,11 +403,18 @@ function viewHeute(){var now=today(),open=state.tasks.filter(function(t){return!
       '<button class="btn small" data-act="chk-task" data-key="'+x.key+'" data-id="'+x.c.id+'">Noch nicht, als Aufgabe anlegen</button>'+
       '<button class="btn small" data-act="chk-snooze" data-key="'+x.key+'">In einer Woche fragen</button></div></div>'});
     h+='</section>'}
-  var ts=daySlots(now),td=open.filter(function(t){return t.due===now});
+  var ts=daySlots(now),td=open.filter(function(t){return t.due===now}),tp=os.filter(function(x){return x.s.date===now});
   h+='<section class="section"><h2>Heute</h2>';
-  if(ts.length||td.length)h+='<div class="day today">'+td.map(deadlineRow).join("")+ts.map(slotRow).join("")+'</div>';
+  if(ts.length||td.length||tp.length)h+='<div class="day today">'+td.map(deadlineRow).join("")+ts.map(slotRow).join("")+tp.map(function(x){return stepRow(x.p,x.s,{proj:true,date:false})}).join("")+'</div>';
   else h+='<div class="empty">Für heute ist nichts eingeplant. In „Woche“ legst du Zeitblöcke an.</div>';
   h+='</section>';
+  var act=state.projects.filter(function(p){var st=pStats(p);return st.total&&st.done<st.total});
+  if(act.length){h+='<section class="section"><h2>Projekte</h2>';
+    act.forEach(function(p){var st=pStats(p),list=pSteps(p).filter(function(s){return!s.d&&s.date&&s.date!==now&&diff(s.date,now)<=7});
+      h+='<div class="kw"><button class="khead" data-act="proj-open" data-id="'+esc(p.id)+'"><span class="ptitle">'+esc(pShort(p))+'</span>'+planChip(st)+'</button>'+sollBar(st)+
+        (list.length?list.slice(0,8).map(function(s){return stepRow(p,s)}).join(""):(st.next?'<div class="pstep"><span class="nextline"><b>Nächster Schritt:</b> '+esc(st.next.t)+(st.next.date?' · '+esc(fmt(st.next.date)):"")+'</span></div>':""))+
+        (list.length>8?'<button class="btn small" data-act="proj-open" data-id="'+esc(p.id)+'">'+(list.length-8)+' weitere anzeigen</button>':"")+'</div>'});
+    h+='</section>'}
   var next=open.filter(function(t){return t.due}).sort(byDue).slice(0,6);
   h+='<section class="section"><h2>Nächste Fristen</h2>';
   h+=next.length?'<div class="list">'+next.map(card).join("")+'</div>':'<div class="empty">Noch keine Aufgabe mit Frist. Mit „+ Aufgabe“ legst du die erste an.</div>';
@@ -336,6 +432,30 @@ function viewAufgaben(){var f=ui.filter,all=state.tasks.filter(function(t){retur
     if(ui.showDone)h+='<div class="list">'+done.map(card).join("")+'</div>'}
   return '<div class="section">'+h+'</div>'}
 
+function viewProjekte(){var p=ui.project&&project(ui.project);if(p)return viewProjekt(p);ui.project=null;
+  if(!state.projects.length)return'<div class="empty">Noch kein Projekt. Tippe auf „+ Projekt“ und füge einen Zeitplan ein, zum Beispiel für eine Haus- oder Projektarbeit.</div>';
+  return'<div class="list">'+state.projects.map(projCard).join("")+'</div>'}
+function viewProjekt(p){var st=pStats(p),now=today(),steps=pSteps(p),thisWeek=weekStart(0);
+  var h='<div class="rowbtns"><button class="btn small" data-act="proj-back">← Alle Projekte</button><button class="btn small" data-act="proj-edit">Projekt bearbeiten</button></div>';
+  h+='<div class="pinfo cat-'+(CATS[p.cat]?p.cat:"uni")+'"><div class="ptitle">'+esc(p.title||"Projekt")+'</div>'+
+    (p.due?'<div class="pdue"><b>Abgabe '+esc(fmt(p.due,true))+'</b> · '+esc(daysLeft(p.due))+'</div>':"")+
+    (p.note?'<div class="pnote">'+esc(p.note).replace(/\n/g,"<br>")+'</div>':"")+
+    '<div class="row">'+planChip(st)+'<span class="note">'+st.done+' von '+st.total+' erledigt, Soll bis heute: '+st.soll+'</span></div>'+sollBar(st)+
+    '<div class="legend">Der dunkle Strich im Balken zeigt, wie weit du laut Plan heute sein solltest.</div></div>';
+  if(!inClaude&&st.done<st.total)h+='<div class="rowbtns"><button class="btn primary" data-act="cal-proj">Alle offenen Schritte in den Kalender</button></div><div class="note icsMsg" role="status"></div>';
+  var late=steps.filter(function(s){return!s.d&&s.date&&s.date<now});
+  if(late.length){h+='<div class="kw late" id="kwNow"><h3>Überfällig</h3>'+late.map(function(s){return stepRow(p,s)}).join("")+'</div>';ui.anchorSet=true}
+  var groups=[],g=null;
+  steps.forEach(function(s){if(late.indexOf(s)>=0||(ui.hideDone&&s.d))return;var ws=s.date?weekOf(s.date):"ohne";
+    if(!g||g.ws!==ws){g={ws:ws,items:[]};groups.push(g)}g.items.push(s)});
+  groups.forEach(function(g){var lab=g.ws==="ohne"?"Ohne Datum":"KW "+kw(g.ws)+" · "+fmtShort(g.ws)+" bis "+fmtShort(addDays(g.ws,6))+(g.ws===thisWeek?" · diese Woche":"");
+    h+='<div class="kw'+(g.ws===thisWeek?" now":"")+'"'+(g.ws>=thisWeek&&!ui.anchorSet?' id="kwNow"':"")+'><h3>'+esc(lab)+'</h3>'+g.items.map(function(s){return stepRow(p,s)}).join("")+'</div>';
+    if(g.ws>=thisWeek)ui.anchorSet=true});
+  ui.anchorSet=false;
+  if(!groups.length&&!late.length)h+='<div class="empty">'+(st.total?"Alle Schritte erledigt.":"Noch keine Schritte. Mit „+ Schritt“ legst du den ersten an.")+'</div>';
+  if(st.done)h+='<button class="btn small" data-act="proj-hidedone">'+(ui.hideDone?"Erledigte anzeigen":"Erledigte ausblenden")+'</button>';
+  return'<div class="section">'+h+'</div>'}
+
 function weekStart(off){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+off*7);return iso(d)}
 function kw(s){var d=parse(s);d.setDate(d.getDate()+3-((d.getDay()+6)%7));var w1=new Date(d.getFullYear(),0,4);
   return 1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)}
@@ -344,11 +464,13 @@ function viewWoche(){var start=weekStart(ui.week),now=today();
     '<strong>KW '+kw(start)+' · '+esc(fmt(start))+' bis '+esc(fmt(addDays(start,6)))+'</strong>'+
     '<button class="btn small" data-act="week" data-d="1" aria-label="Nächste Woche">→</button></div>';
   for(var i=0;i<7;i++){var d=addDays(start,i),dt=parse(d),
-    dl=state.tasks.filter(function(t){return!t.done&&t.due===d}),sl=daySlots(d);
+    dl=state.tasks.filter(function(t){return!t.done&&t.due===d}),sl=daySlots(d),ps=[];
+    state.projects.forEach(function(p){(p.steps||[]).forEach(function(s){if(s.date===d)ps.push({p:p,s:s})})});
+    ps.sort(function(a,b){return stepKey(a.s).localeCompare(stepKey(b.s))});
     h+='<div class="day'+(d===now?" today":"")+'"><div class="dhead"><span class="dname">'+dt.toLocaleDateString("de-DE",{weekday:"long"})+
       '<small>'+dt.toLocaleDateString("de-DE",{day:"numeric",month:"short"})+(d===now?" · heute":"")+'</small></span>'+
       '<button class="btn small" data-act="slot-new" data-date="'+d+'">+ Einplanen</button></div>'+
-      dl.map(deadlineRow).join("")+sl.map(slotRow).join("")+'</div>'}
+      dl.map(deadlineRow).join("")+sl.map(slotRow).join("")+ps.map(function(x){return stepRow(x.p,x.s,{proj:true,date:false})}).join("")+'</div>'}
   if(ui.week!==0)h+='<button class="btn small" data-act="week" data-d="0">Zur aktuellen Woche</button>';
   return '<div class="section">'+h+'</div>'}
 
@@ -357,7 +479,8 @@ function viewMehr(){var h='<div class="section">';
     '<p>Fragt zur passenden Zeit im Semester nach Rückmeldung, Kursbelegung, Klausuranmeldung und Terminen. Die Zeiträume sind typische Werte, keine Fristen deiner Uni.</p></div>';
   h+='<div class="card"><h3>Erinnerungen im Kalender</h3>';
   if(inClaude)h+='<p>Der Kalender-Export steht in der Version für den Home-Bildschirm bereit. In dieser Ansicht kann die Seite keine Kalenderdatei übergeben.</p>';
-  else h+='<p>Erstellt eine Kalenderdatei mit allen offenen Fristen und Zeitblöcken. Der Kalender erinnert dich eine Woche vorher und am Vortag, jeweils zur eingetragenen Uhrzeit oder ohne Uhrzeit um 9 Uhr.</p>'+
+  else h+='<p>Erstellt eine Kalenderdatei mit allen offenen Fristen, Projektschritten und Zeitblöcken.</p>'+
+    '<ul class="howto"><li>Fristen: eine Woche vorher und am Vortag, zur eingetragenen Uhrzeit oder um 9 Uhr.</li><li>Projektschritte: am Vortag um 18 Uhr und am Tag selbst um 8 Uhr. Mit Uhrzeit am Vortag und 2 Stunden vorher.</li><li>Abgaben in Projekten: eine Woche vorher und am Vortag.</li></ul>'+
     '<div class="rowbtns"><button class="btn primary" data-act="cal-all">Im Kalender öffnen</button><button class="btn" data-act="ics-all">Datei teilen</button></div>'+
     '<p><b>Im Kalender öffnen</b> zeigt die Termine direkt in der Kalender-Vorschau. Erscheint dort nur Text oder eine leere Seite, schließe die App und öffne sie neu.</p>'+
     '<p><b>Datei teilen</b>, falls das nicht klappt:</p>'+
@@ -370,12 +493,15 @@ function viewMehr(){var h='<div class="section">';
     '<div class="note" id="backupMsg"></div></div>';
   return h+'</div>'}
 
-var TITLES={heute:"Fristenbrett",aufgaben:"Aufgaben",woche:"Wochenplan",mehr:"Einstellungen"};
+var TITLES={heute:"Fristenbrett",aufgaben:"Aufgaben",projekte:"Projekte",woche:"Wochenplan",mehr:"Einstellungen"};
 function render(){
   $("#dateline").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-  $("#viewtitle").textContent=TITLES[ui.tab];
+  var pj=ui.tab==="projekte"&&ui.project&&project(ui.project);
+  $("#viewtitle").textContent=pj?pShort(pj):(TITLES[ui.tab]||"Fristenbrett");
   $("#newBtn").hidden=ui.tab==="mehr";
-  $("#view").innerHTML=ui.tab==="aufgaben"?viewAufgaben():ui.tab==="woche"?viewWoche():ui.tab==="mehr"?viewMehr():viewHeute();
+  $("#newBtn").textContent=ui.tab==="projekte"?(pj?"+ Schritt":"+ Projekt"):"+ Aufgabe";
+  $("#view").innerHTML=ui.tab==="aufgaben"?viewAufgaben():ui.tab==="projekte"?viewProjekte():ui.tab==="woche"?viewWoche():ui.tab==="mehr"?viewMehr():viewHeute();
+  if(ui.scrollNow){ui.scrollNow=false;var k=document.getElementById("kwNow");if(k){k.scrollIntoView({block:"start"});window.scrollBy(0,-12)}else window.scrollTo(0,0)}
   document.querySelectorAll("nav.tabs button").forEach(function(b){if(b.dataset.tab===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
 }
 
@@ -406,21 +532,51 @@ function sheetSlot(date){var open=state.tasks.filter(function(t){return!t.done})
   '<div class="two"><div class="field"><label for="slotTime">Beginn</label><input id="slotTime" type="time" value="18:00"></div>'+
   '<div class="field"><label for="slotDur">Dauer</label><select id="slotDur"><option value="15">15 Min.</option><option value="30">30 Min.</option><option value="45">45 Min.</option><option value="60" selected>1 Std.</option><option value="90">1,5 Std.</option><option value="120">2 Std.</option><option value="180">3 Std.</option></select></div></div>'+
   '<button class="btn primary" data-act="slot-save">Einplanen</button></div>'}
+function catOpts(sel){return Object.keys(CATS).map(function(k){return'<option value="'+k+'"'+(sel===k?" selected":"")+'>'+CATS[k]+'</option>'}).join("")}
+function sheetPlan(){return'<div class="panel" role="dialog" aria-label="Projekt anlegen"><div class="phead"><h3>Projekt anlegen</h3><button class="btn small" data-act="close">Abbrechen</button></div>'+
+  '<p class="note">Füge deinen Zeitplan ein. Jede Zeile mit Datum wird ein Schritt, zum Beispiel <code>2026-11-27 | Termin | Gespräch mit Prof.</code> Die Art (Aufgabe, Termin, Meilenstein) ist optional, eine Uhrzeit kann hinter dem Datum stehen. Die erste Zeile ohne Datum wird der Titel, „Abgabe: …“ die Abgabefrist.</p>'+
+  '<div class="field"><label for="planText">Zeitplan</label><textarea id="planText" placeholder="Titel der Arbeit&#10;Abgabe: 2027-01-19&#10;2026-11-20 | Aufgabe | Erster Schritt"></textarea></div>'+
+  '<div class="field"><label for="planCat">Bereich</label><select id="planCat">'+catOpts("uni")+'</select></div>'+
+  '<div class="note" id="planPreview" role="status"></div>'+
+  '<button class="btn primary" data-act="plan-save">Projekt anlegen</button></div>'}
+function planPreview(){var el=$("#planPreview"),t=$("#planText");if(!el||!t)return;var r=parsePlan(t.value);
+  el.textContent=t.value.trim()?(r.steps.length+(r.steps.length===1?" Schritt":" Schritte")+" erkannt"+(r.due?", Abgabe "+fmt(r.due,true):"")+(r.title?". Titel: "+r.title:"")+(r.steps.some(function(s){return!s.date})?". Hinweis: Mindestens ein Datum ist ungültig.":"")):""}
+function sheetStep(p,s){return'<div class="panel" role="dialog" aria-label="Schritt bearbeiten"><div class="phead"><h3>Schritt · '+esc(pShort(p))+'</h3><button class="btn small primary" data-act="close">Fertig</button></div>'+
+  '<div class="field"><label for="sText">Was ist zu tun?</label><textarea id="sText" data-sf="t" rows="2" placeholder="z. B. Kapitel 3 schreiben">'+esc(s.t)+'</textarea></div>'+
+  '<div class="field"><label for="sType">Art</label><select id="sType" data-sf="type">'+Object.keys(TYPES).map(function(k){return'<option value="'+k+'"'+((s.type||"aufgabe")===k?" selected":"")+'>'+TYPES[k]+'</option>'}).join("")+'</select></div>'+
+  '<div class="two"><div class="field"><label for="sDate">Datum</label><input id="sDate" data-sf="date" type="date" value="'+esc(s.date||"")+'"></div>'+
+  '<div class="field"><label for="sTime">Uhrzeit (optional)</label><input id="sTime" data-sf="time" type="time" value="'+esc(s.time||"")+'"></div></div>'+
+  '<div class="card"><label class="switch" for="sDone">Erledigt<input type="checkbox" id="sDone" data-sf="d"'+(s.d?" checked":"")+'></label></div>'+
+  '<div class="rowbtns">'+(!inClaude&&s.date?'<button class="btn" data-act="cal-step">Im Kalender öffnen</button>':"")+
+  '<button class="btn danger" data-act="pstep-del">'+(ui.confirmDel?"Wirklich löschen?":"Schritt löschen")+'</button></div>'+
+  (!inClaude?'<div class="note icsMsg" role="status"></div>':"")+'</div>'}
+function sheetProj(p){return'<div class="panel" role="dialog" aria-label="Projekt bearbeiten"><div class="phead"><h3>Projekt</h3><button class="btn small primary" data-act="close">Fertig</button></div>'+
+  '<div class="field"><label for="pTitle">Titel</label><input id="pTitle" data-pf="title" type="text" value="'+esc(p.title)+'"></div>'+
+  '<div class="two"><div class="field"><label for="pCat">Bereich</label><select id="pCat" data-pf="cat">'+catOpts(p.cat)+'</select></div>'+
+  '<div class="field"><label for="pDue">Abgabe</label><input id="pDue" data-pf="due" type="date" value="'+esc(p.due||"")+'"></div></div>'+
+  '<div class="field"><label for="pNote">Hinweise</label><textarea id="pNote" data-pf="note" rows="4">'+esc(p.note||"")+'</textarea></div>'+
+  '<div class="rowbtns"><button class="btn danger" data-act="proj-del">'+(ui.confirmDel?"Projekt wirklich löschen?":"Projekt löschen")+'</button></div></div>'}
 function renderSheet(){var el=$("#sheet"),s=ui.sheet;document.body.classList.toggle("locked",!!s);if(!s){el.hidden=true;el.innerHTML="";return}
-  if(s.type==="task"){var t=task(s.id);if(!t){ui.sheet=null;return renderSheet()}el.innerHTML=sheetTask(t)}else el.innerHTML=sheetSlot(s.date);
+  if(s.type==="task"){var t=task(s.id);if(!t){ui.sheet=null;return renderSheet()}el.innerHTML=sheetTask(t)}
+  else if(s.type==="plan")el.innerHTML=sheetPlan();
+  else if(s.type==="pstep"){var pp=project(s.p),ss=pStep(pp,s.s);if(!ss){ui.sheet=null;return renderSheet()}el.innerHTML=sheetStep(pp,ss)}
+  else if(s.type==="proj"){var pq=project(s.id);if(!pq){ui.sheet=null;return renderSheet()}el.innerHTML=sheetProj(pq)}
+  else el.innerHTML=sheetSlot(s.date);
   el.hidden=false;el.querySelectorAll(".step textarea").forEach(grow)}
 function grow(a){a.style.height="auto";a.style.height=a.scrollHeight+"px"}
 function openTask(id){ui.sheet={type:"task",id:id};ui.confirmDel=false;renderSheet()}
 function closeSheet(){var s=ui.sheet;if(s&&s.type==="task"){var t=task(s.id);
   if(t&&!String(t.title).trim()){state.tasks=state.tasks.filter(function(x){return x!==t});save()}}
+  if(s&&s.type==="pstep"){var pp=project(s.p),ss=pStep(pp,s.s);if(ss&&!String(ss.t).trim()){pp.steps=pp.steps.filter(function(x){return x!==ss});save()}}
   ui.sheet=null;renderSheet();render()}
+function openProject(id){ui.tab="projekte";ui.project=id;ui.scrollNow=true;try{localStorage.setItem("fristenbrett-tab","projekte");localStorage.setItem("fristenbrett-projekt",id)}catch(x){}render()}
 function newTask(preset){var t=Object.assign({id:uid(),title:"",cat:ui.filter!=="alle"?ui.filter:"privat",due:"",blocked:"",note:"",steps:[],pct:0,done:false},preset||{});
   state.tasks.push(t);save();openTask(t.id);if(!t.title){var f=$("#fTitle");if(f)f.focus()}}
 function refreshProgress(t){var p=progress(t),b=$("#pBar"),c=$("#pPct");if(b)b.style.width=p+"%";if(c)c.textContent=p+" %"}
 
 /* ---------- Kalender ---------- */
 function icsEsc(s){return String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n")}
-function buildICS(tasks,slots){var stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Fristenbrett//DE","CALSCALE:GREGORIAN"];
+function buildICS(tasks,slots,projects){var stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,""),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Fristenbrett//DE","CALSCALE:GREGORIAN"];
   function alarm(trig,txt){L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(txt),"TRIGGER:"+trig,"END:VALARM")}
   tasks.forEach(function(t){if(!t.due||t.done)return;var d=t.due.replace(/-/g,""),e=addDays(t.due,1).replace(/-/g,""),tm=/^\d\d:\d\d$/.test(t.time||"");
     L.push("BEGIN:VEVENT","UID:frist-"+t.id+"@fristenbrett","DTSTAMP:"+stamp);
@@ -433,6 +589,18 @@ function buildICS(tasks,slots){var stamp=new Date().toISOString().replace(/[-:]/
   slots.forEach(function(s){var t=task(s.taskId);if(!t||t.done||!s.time)return;
     L.push("BEGIN:VEVENT","UID:block-"+s.id+"@fristenbrett","DTSTAMP:"+stamp,"DTSTART:"+s.date.replace(/-/g,"")+"T"+s.time.replace(":","")+"00","DURATION:PT"+s.dur+"M","SUMMARY:"+icsEsc(t.title));
     alarm("-PT10M","Gleich: "+t.title);L.push("END:VEVENT")});
+  (projects||[]).forEach(function(p){var sh=pShort(p),dueStep=false;
+    (p.steps||[]).forEach(function(s){if(!s.date)return;if(p.due&&s.date===p.due)dueStep=true;if(s.d)return;
+      var d=s.date.replace(/-/g,""),e=addDays(s.date,1).replace(/-/g,""),tm=/^\d\d:\d\d$/.test(s.time||""),big=s.type==="meilenstein"&&/abgabe/i.test(s.t);
+      L.push("BEGIN:VEVENT","UID:schritt-"+p.id+"-"+s.id+"@fristenbrett","DTSTAMP:"+stamp);
+      if(tm)L.push("DTSTART:"+d+"T"+s.time.replace(":","")+"00","DURATION:PT"+(s.type==="termin"?60:30)+"M");else L.push("DTSTART;VALUE=DATE:"+d,"DTEND;VALUE=DATE:"+e);
+      L.push("SUMMARY:"+icsEsc(sh+" · "+(s.type==="termin"?"Termin: ":s.type==="meilenstein"?"◆ ":"")+s.t),"DESCRIPTION:"+icsEsc((p.title||"")+"\n"+(TYPES[s.type]||"Aufgabe")+(p.note?"\n\n"+p.note:"")));
+      if(big){if(tm){alarm("-P7D","In einer Woche: "+s.t);alarm("-P1D","Morgen: "+s.t)}else{alarm("-P6DT15H","In einer Woche: "+s.t);alarm("-PT15H","Morgen: "+s.t)}}
+      else if(tm){alarm("-P1D","Morgen "+s.time+" Uhr: "+s.t);alarm("-PT2H","In 2 Stunden: "+s.t)}
+      else{alarm("-PT6H","Morgen dran: "+s.t);alarm("PT8H","Heute dran: "+s.t)}
+      L.push("END:VEVENT")});
+    if(p.due&&!dueStep){var dd=p.due.replace(/-/g,"");L.push("BEGIN:VEVENT","UID:abgabe-"+p.id+"@fristenbrett","DTSTAMP:"+stamp,"DTSTART;VALUE=DATE:"+dd,"DTEND;VALUE=DATE:"+addDays(p.due,1).replace(/-/g,""),"SUMMARY:"+icsEsc("Abgabe: "+(p.title||sh)));
+      alarm("-P6DT15H","In einer Woche Abgabe: "+sh);alarm("-PT15H","Morgen Abgabe: "+sh);L.push("END:VEVENT")}});
   L.push("END:VCALENDAR");return L.map(function(l){var o=[];while(l.length>60){o.push(l.slice(0,60));l=" "+l.slice(60)}o.push(l);return o.join("\r\n")}).join("\r\n")+"\r\n"}
 function calViaWorker(ics,name){
   if(!("caches" in window)||!navigator.serviceWorker||!navigator.serviceWorker.controller){openICS(ics,name);return}
@@ -464,9 +632,25 @@ function importData(file){var r=new FileReader();r.onload=function(){try{var s=J
 /* ---------- Ereignisse ---------- */
 document.addEventListener("click",function(e){
   if(e.target.id==="sheet"){closeSheet();return}
-  var tab=e.target.closest("[data-tab]");if(tab){ui.tab=tab.dataset.tab;try{localStorage.setItem("fristenbrett-tab",ui.tab)}catch(x){}render();window.scrollTo(0,0);return}
+  var tab=e.target.closest("[data-tab]");if(tab){if(tab.dataset.tab==="projekte"&&ui.tab==="projekte")ui.project=null;ui.tab=tab.dataset.tab;if(ui.tab==="projekte"&&ui.project)ui.scrollNow=true;try{localStorage.setItem("fristenbrett-tab",ui.tab)}catch(x){}render();window.scrollTo(0,0);return}
   var el=e.target.closest("[data-act]");if(!el)return;var a=el.dataset.act,cur=ui.sheet&&ui.sheet.type==="task"?task(ui.sheet.id):null,now=today();
-  if(a==="new")newTask();
+  var sp=ui.sheet&&ui.sheet.type==="pstep"?project(ui.sheet.p):null,ss=sp?pStep(sp,ui.sheet.s):null,pj=ui.project&&project(ui.project);
+  if(a==="new"){if(ui.tab!=="projekte")newTask();else if(pj){var ns={id:uid(),date:today(),time:"",type:"aufgabe",t:"",d:false};pj.steps=pj.steps||[];pj.steps.push(ns);
+      ui.sheet={type:"pstep",p:pj.id,s:ns.id};ui.confirmDel=false;renderSheet();var f=$("#sText");if(f)f.focus()}
+    else{ui.sheet={type:"plan"};renderSheet()}}
+  else if(a==="proj-open")openProject(el.dataset.id);
+  else if(a==="proj-back"){ui.project=null;try{localStorage.removeItem("fristenbrett-projekt")}catch(x){}render();window.scrollTo(0,0)}
+  else if(a==="proj-edit"&&pj){ui.sheet={type:"proj",id:pj.id};ui.confirmDel=false;renderSheet()}
+  else if(a==="proj-hidedone"){ui.hideDone=!ui.hideDone;render()}
+  else if(a==="proj-del"&&ui.sheet&&ui.sheet.type==="proj"){if(!ui.confirmDel){ui.confirmDel=true;renderSheet()}else{var did=ui.sheet.id;state.projects=state.projects.filter(function(p){return p.id!==did});
+      save();ui.project=null;ui.sheet=null;renderSheet();render()}}
+  else if(a==="pstep-edit"){ui.sheet={type:"pstep",p:el.dataset.p,s:el.dataset.s};ui.confirmDel=false;renderSheet()}
+  else if(a==="pstep-del"&&ss){if(!ui.confirmDel){ui.confirmDel=true;renderSheet()}else{sp.steps=sp.steps.filter(function(x){return x!==ss});save();ui.sheet=null;renderSheet();render()}}
+  else if(a==="cal-step"&&ss)calViaWorker(buildICS([],[],[{id:sp.id,title:sp.title,note:sp.note,cat:sp.cat,due:"",steps:[ss]}]),"schritt.ics");
+  else if(a==="cal-proj"&&pj)calViaWorker(buildICS([],[],[pj]),"projekt.ics");
+  else if(a==="plan-save"){var r=parsePlan(($("#planText")||{}).value);if(!r.title&&!r.steps.length){var pv=$("#planPreview");if(pv)pv.textContent="Kein Zeitplan erkannt. Füge mindestens einen Titel oder eine Zeile mit Datum ein.";return}
+    var np={id:uid(),title:r.title||"Neues Projekt",cat:($("#planCat")||{}).value||"uni",due:r.due,note:r.notes.join("\n"),steps:r.steps.filter(function(s){return s.date})};
+    state.projects.push(np);save();ui.sheet=null;renderSheet();openProject(np.id)}
   else if(a==="open")openTask(el.dataset.id);
   else if(a==="close")closeSheet();
   else if(a==="filter"){ui.filter=el.dataset.f;render()}
@@ -477,10 +661,10 @@ document.addEventListener("click",function(e){
   else if(a==="done-toggle"&&cur){cur.done=!cur.done;save();closeSheet()}
   else if(a==="del"&&cur){if(!ui.confirmDel){ui.confirmDel=true;renderSheet()}else{state.tasks=state.tasks.filter(function(t){return t!==cur});
       state.slots=state.slots.filter(function(s){return s.taskId!==cur.id});save();ui.sheet=null;renderSheet();render()}}
-  else if(a==="ics-one"&&cur)openICS(buildICS([cur],[]),"frist.ics");
-  else if(a==="cal-one"&&cur)calViaWorker(buildICS([cur],[]),"frist.ics");
-  else if(a==="cal-all")calViaWorker(buildICS(state.tasks,state.slots),"fristenbrett.ics");
-  else if(a==="ics-all")openICS(buildICS(state.tasks,state.slots),"fristenbrett.ics");
+  else if(a==="ics-one"&&cur)openICS(buildICS([cur],[],[]),"frist.ics");
+  else if(a==="cal-one"&&cur)calViaWorker(buildICS([cur],[],[]),"frist.ics");
+  else if(a==="cal-all")calViaWorker(buildICS(state.tasks,state.slots,state.projects),"fristenbrett.ics");
+  else if(a==="ics-all")openICS(buildICS(state.tasks,state.slots,state.projects),"fristenbrett.ics");
   else if(a==="slot-new"){ui.sheet={type:"slot",date:el.dataset.date};renderSheet()}
   else if(a==="slot-save"){var tid=$("#slotTask").value,dd=$("#slotDate").value;if(tid&&dd){state.slots.push({id:uid(),taskId:tid,date:dd,time:$("#slotTime").value||"",dur:+$("#slotDur").value});save()}ui.sheet=null;renderSheet();render()}
   else if(a==="slot-del"){state.slots=state.slots.filter(function(s){return s.id!==el.dataset.id});save();render()}
@@ -493,6 +677,12 @@ document.addEventListener("click",function(e){
 });
 function onField(e){var el=e.target;
   if(el.id==="importFile"){if(el.files&&el.files[0])importData(el.files[0]);el.value="";return}
+  if(el.dataset.pstep!==undefined){if(e.type!=="change")return;var q=el.dataset.pstep.split("|"),qp=project(q[0]),qs=pStep(qp,q[1]);if(qs){qs.d=el.checked;save();render()}return}
+  if(el.id==="planText"){planPreview();return}
+  if(ui.sheet&&ui.sheet.type==="pstep"&&el.dataset.sf){var sp=project(ui.sheet.p),st=pStep(sp,ui.sheet.s);if(!st)return;var sf=el.dataset.sf;
+    if(sf==="d"){if(e.type!=="change")return;st.d=el.checked}else if(sf==="t"){st.t=el.value.replace(/\n/g," ")}else st[sf]=el.value;
+    if(sf==="date"&&e.type==="change"&&!el.value)st.date="";save();return}
+  if(ui.sheet&&ui.sheet.type==="proj"&&el.dataset.pf){var pr=project(ui.sheet.id);if(!pr)return;pr[el.dataset.pf]=el.value;save();return}
   if(!ui.sheet||ui.sheet.type!=="task")return;var t=task(ui.sheet.id);if(!t)return;
   if(el.dataset.f){var f=el.dataset.f;t[f]=f==="pct"?+el.value:el.value;if(f==="pct")refreshProgress(t);
     if(f==="blocked"&&e.type==="change")renderSheet();save()}
